@@ -7,3 +7,5 @@ CREATE TABLE testTable (
 
 COPY testTable (col1, col2)
 FROM 'C:\\Users\\55zay\\Desktop\\CLASSES\\csce331\\test.csv' DELIMITER ',' CSV HEADER;
+
+-- this is a test
