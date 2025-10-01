@@ -1,6 +1,6 @@
-WITH target AS (
-  SELECT date_trunc('week', :'target_date'::timestamp) AS wk
-)
-SELECT COUNT(*) AS orders
-FROM orders o, target t
-WHERE date_trunc('week', (o.order_date::timestamp)) = t.wk;
+SELECT
+  date_trunc('week', order_date::timestamp)::date AS week_start,
+  COUNT(*) AS orders
+FROM orders
+GROUP BY 1
+ORDER BY 1;
