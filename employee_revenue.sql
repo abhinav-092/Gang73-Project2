@@ -1,7 +1,7 @@
-SELECT o."Employee_ID",
-       e."Name" AS employee_name,
-       SUM(o."Total_price") AS employee_revenue
+SELECT o.employee_ID,
+       e.employee_name AS employee_name,
+       SUM(o.total_price) AS employee_revenue
 FROM orders o
-LEFT JOIN employees e ON e."Employee_ID" = o."Employee_ID"
-GROUP BY o."Employee_ID", e."Name"
+LEFT JOIN employees e ON e.employee_ID = o.employee_ID
+GROUP BY o.employee_ID, e.employee_name
 ORDER BY employee_revenue DESC;
