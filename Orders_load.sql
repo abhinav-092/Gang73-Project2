@@ -1,3 +1,4 @@
+--Prep for update
 DROP TABLE IF EXISTS orders;
 
 CREATE TABLE orders(
@@ -9,4 +10,5 @@ CREATE TABLE orders(
 );
 
 \copy orders FROM 'orders.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+--Display changes
 SELECT * FROM orders;

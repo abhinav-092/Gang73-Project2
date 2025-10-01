@@ -1,3 +1,4 @@
+--Update for changes
 DROP TABLE IF EXISTS inventory;
 
 CREATE TABLE inventory(
@@ -10,4 +11,5 @@ CREATE TABLE inventory(
 );
 
 \copy inventory FROM 'inventory.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+--Display changes
 SELECT * FROM inventory;

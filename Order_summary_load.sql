@@ -1,3 +1,4 @@
+--Prep for update
 DROP TABLE IF EXISTS order_summary;
 
 CREATE TABLE order_summary(
@@ -8,4 +9,5 @@ CREATE TABLE order_summary(
 );
 
 \copy order_summary FROM 'order_summary.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+--Display changes
 SELECT * FROM order_summary;

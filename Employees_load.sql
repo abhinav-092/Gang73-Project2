@@ -1,3 +1,4 @@
+--Avoiding errors while creating and also making sure the table is updated to latest information
 DROP TABLE IF EXISTS employees;
 
 CREATE TABLE employees(
@@ -8,4 +9,5 @@ CREATE TABLE employees(
 );
 
 \copy employees FROM 'employees.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+--Displaying table to show changes
 SELECT * FROM employees;

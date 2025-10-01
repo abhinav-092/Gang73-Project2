@@ -1,3 +1,5 @@
+-- Copying the specific tables into their own CSVs
+
 \copy orders TO 'orders_out.csv' WITH (FORMAT csv, HEADER);
 
 \copy menu_items TO 'menu_items_out.csv' WITH (FORMAT csv, HEADER);

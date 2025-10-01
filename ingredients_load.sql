@@ -1,3 +1,4 @@
+--Update table to latest info
 DROP TABLE IF EXISTS ingredients;
 
 CREATE TABLE ingredients(
@@ -9,4 +10,5 @@ CREATE TABLE ingredients(
 );
 
 \copy ingredients FROM 'ingredients.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+--Display changes
 SELECT * FROM ingredients;

@@ -1,3 +1,4 @@
+--Update table if needed by remaking
 DROP TABLE IF EXISTS menu_items;
 
 CREATE TABLE menu_items(
@@ -8,4 +9,5 @@ CREATE TABLE menu_items(
 );
 
 \copy menu_items FROM 'menu_items.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+--Display changes
 SELECT * FROM menu_items;
