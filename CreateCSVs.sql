@@ -1,9 +1,11 @@
-DROP TABLE IF EXISTS testtable;
+\copy orders TO 'orders_out.csv' WITH (FORMAT csv, HEADER);
 
-CREATE TABLE testtable(
-    col1 VARCHAR,
-    col2 VARCHAR
-\copy testtable(col1, col2) FROM 'testSheet1.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
-=======
-);
->>>>>>> 6f6f08f5bd350a0d08582f0c75b634f266d7d198
+\copy menu_items TO 'menu_items_out.csv' WITH (FORMAT csv, HEADER);
+
+\copy ingredients TO 'ingredients_out.csv' WITH (FORMAT csv, HEADER);
+
+\copy inventory TO 'inventory_out.csv' WITH (FORMAT csv, HEADER);
+
+\copy employees TO 'employees_out.csv' WITH (FORMAT csv, HEADER);
+
+\copy order_summary TO 'order_summary_out.csv' WITH (FORMAT csv, HEADER);
