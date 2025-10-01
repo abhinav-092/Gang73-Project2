@@ -1,9 +1,17 @@
-WITH top10 AS (
-  SELECT total_price
-  FROM orders
-  WHERE order_date = :'target_date'::date
-  ORDER BY total_price DESC
-  LIMIT 10
+WITH daily_totals AS (
+  SELECT
+    order_date::date AS day,
+    SUM(total_price) AS total_sales
+  FROM
+    orders
+  GROUP BY
+    order_date::date
 )
-SELECT COALESCE(SUM(total_price), 0) AS top10_sum
-FROM top10;
+SELECT
+  day,
+  total_sales
+FROM
+  daily_totals
+ORDER BY
+  total_sales DESC
+LIMIT 10;
