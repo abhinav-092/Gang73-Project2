@@ -1,3 +1,4 @@
+-- find the hour with the most orders
 SELECT
   EXTRACT(HOUR FROM order_time)::int AS hour_local,
   COUNT(*) AS orders
