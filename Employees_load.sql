@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS employees;
 
 CREATE TABLE employees(
-    Employee_ID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Employee_ID INT PRIMARY KEY,
     Employee_name VARCHAR(120),
     Phone_number VarChar(10),
     Is_manager BOOLEAN
