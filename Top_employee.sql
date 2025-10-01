@@ -1,13 +1,13 @@
-WITH performance AS (
+WITH performance AS ( --finding top performance employee
     SELECT 
         employee_ID, 
-        SUM(total_price) AS perf
+        SUM(total_price) AS perf --ordering by revenue
     FROM orders
     GROUP BY employee_ID
     ORDER BY perf DESC
     LIMIT 1
 )
-SELECT 
+SELECT --displaying with extra information
     e.employee_name,
     e.phone_number,
     p.perf
