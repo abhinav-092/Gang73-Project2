@@ -7,5 +7,5 @@ CREATE TABLE employees(
     Is_manager BOOLEAN
 );
 
-\copy employees FROM 'Project 2 Database - Employees.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy employees FROM 'employees.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 SELECT * FROM employees;

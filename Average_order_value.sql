@@ -12,5 +12,4 @@ GROUP BY
     order_day,
     order_month
 ORDER BY
-    order_month DESC,
     order_day DESC;

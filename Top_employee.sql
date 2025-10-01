@@ -1,10 +1,15 @@
-SELECT Employee_name, Phone_number 
-FROM employees 
-WHERE Employee_ID = (
-    SELECT Employee_ID FROM (
-        SELECT Employee_ID, SUM(orders.Total_price) AS perf 
-        FROM orders 
-        GROUP BY Employee_ID 
-        ORDER BY perf DESC 
-        LIMIT 1) AS somename
-    );
+WITH performance AS (
+    SELECT 
+        Employee_ID, 
+        SUM(total_price) AS perf
+    FROM orders
+    GROUP BY Employee_ID
+    ORDER BY perf DESC
+    LIMIT 1
+)
+SELECT 
+    e.employee_name,
+    e.phone_number,
+    p.perf
+FROM employees e
+JOIN performance p ON e.employee_id = p.employee_id;

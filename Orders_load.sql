@@ -8,5 +8,5 @@ CREATE TABLE orders(
     Employee_ID INT
 );
 
-\copy orders FROM 'Project 2 Database - Orders.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy orders FROM 'orders.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 SELECT * FROM orders;

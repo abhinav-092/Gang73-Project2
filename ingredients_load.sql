@@ -8,5 +8,5 @@ CREATE TABLE ingredients(
     Unit VARCHAR(10)
 );
 
-\copy ingredients FROM 'Project 2 Database - Ingredients.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy ingredients FROM 'ingredients.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 SELECT * FROM ingredients;

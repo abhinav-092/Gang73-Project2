@@ -9,5 +9,5 @@ CREATE TABLE inventory(
     Price_per_unit FLOAT
 );
 
-\copy inventory FROM 'Project 2 Database - Inventory.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy inventory FROM 'inventory.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 SELECT * FROM inventory;

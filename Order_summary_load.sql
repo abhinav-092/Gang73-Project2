@@ -7,5 +7,5 @@ CREATE TABLE order_summary(
     item_ID INT
 );
 
-\copy order_summary FROM 'Project 2 Database - Order Summary.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy order_summary FROM 'order_summary.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 SELECT * FROM order_summary;
