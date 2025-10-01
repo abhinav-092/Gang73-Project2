@@ -1,9 +1,9 @@
 SELECT
     EXTRACT(MONTH FROM orders.order_date) as order_month,
     EXTRACT(DAY FROM orders.order_date) as order_day,
-    SUM(orders.Total_price) AS total,
-    COUNT(orders.Total_price) AS num,
-    SUM(orders.Total_price) / COUNT(orders.Total_price) AS avg
+    SUM(orders.total_price) AS total,
+    COUNT(orders.total_price) AS num,
+    SUM(orders.total_price) / COUNT(orders.total_price) AS avg
 FROM
     orders
 WHERE

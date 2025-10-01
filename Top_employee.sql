@@ -1,9 +1,9 @@
 WITH performance AS (
     SELECT 
-        Employee_ID, 
+        employee_ID, 
         SUM(total_price) AS perf
     FROM orders
-    GROUP BY Employee_ID
+    GROUP BY employee_ID
     ORDER BY perf DESC
     LIMIT 1
 )
