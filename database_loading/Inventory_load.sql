@@ -10,6 +10,6 @@ CREATE TABLE inventory(
     price_per_unit FLOAT
 );
 
-\copy inventory FROM 'inventory.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy inventory FROM 'Csv_files/inventory.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 --Display changes
 SELECT * FROM inventory;

@@ -8,6 +8,6 @@ CREATE TABLE menu_items(
     category VARCHAR(25)
 );
 
-\copy menu_items FROM 'menu_items.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy menu_items FROM 'Csv_files/menu_items.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 --Display changes
 SELECT * FROM menu_items;

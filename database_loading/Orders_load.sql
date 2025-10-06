@@ -9,6 +9,6 @@ CREATE TABLE orders(
     employee_ID INT
 );
 
-\copy orders FROM 'orders.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy orders FROM 'Csv_files/orders.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 --Display changes
 SELECT * FROM orders;

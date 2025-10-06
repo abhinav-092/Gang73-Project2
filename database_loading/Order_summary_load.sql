@@ -8,6 +8,6 @@ CREATE TABLE order_summary(
     item_ID INT
 );
 
-\copy order_summary FROM 'order_summary.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy order_summary FROM 'Csv_files/order_summary.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 --Display changes
 SELECT * FROM order_summary;

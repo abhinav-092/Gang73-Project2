@@ -9,6 +9,6 @@ CREATE TABLE ingredients(
     unit VARCHAR(10)
 );
 
-\copy ingredients FROM 'ingredients.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy ingredients FROM 'Csv_files/ingredients.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 --Display changes
 SELECT * FROM ingredients;

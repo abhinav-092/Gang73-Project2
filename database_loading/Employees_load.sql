@@ -8,6 +8,6 @@ CREATE TABLE employees(
     is_manager BOOLEAN
 );
 
-\copy employees FROM 'employees.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+\copy employees FROM 'Csv_files/employees.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 --Displaying table to show changes
 SELECT * FROM employees;
