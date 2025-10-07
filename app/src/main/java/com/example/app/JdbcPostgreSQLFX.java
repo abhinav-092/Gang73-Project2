@@ -5,13 +5,27 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+import java.io.InputStream;
+import java.io.IOException;
 import java.sql.*;
+
+
 
 public class JdbcPostgreSQLFX extends Application {
 
     @Override
     public void start(Stage stage) {
+        try {
+            InputStream is = getClass().getResourceAsStream("test.txt");
+            if (is != null) {
+                System.out.println(new String(is.readAllBytes()));
+            } else {
+                System.out.println("⚠️ test.txt not found in resources folder!");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // UI elements
         Label label = new Label("PostgreSQL Database Viewer:");
         TextArea textArea = new TextArea();

@@ -9,7 +9,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <javafx.version>21</javafx.version>
+    <javafx.version>21.0.2</javafx.version>
   </properties>
 
   <dependencies>
@@ -17,6 +17,13 @@
     <dependency>
       <groupId>org.openjfx</groupId>
       <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+
+    <!-- JavaFX FXML -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
       <version>${javafx.version}</version>
     </dependency>
 
@@ -48,6 +55,13 @@
         <configuration>
           <mainClass>com.example.app.JdbcPostgreSQLFX</mainClass>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

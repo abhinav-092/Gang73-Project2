@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10" style="-fx-padding:20;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="com.example.app.MyController">
+    
+    <Label text="PostgreSQL Database Viewer:" />
+    
+    <Button fx:id="loadMenuButton" text="Load Menu Items" />
+    <Button fx:id="loadOrdersButton" text="Load Order History" />
+    
+    <TextArea fx:id="textArea" prefHeight="0.0" prefWidth="512.0" />
+</VBox>
