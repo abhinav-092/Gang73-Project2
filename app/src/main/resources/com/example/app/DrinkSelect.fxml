@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.FXCollections?>
+
+<?import javafx.geometry.*?>
+
+<?import javafx.scene.control.*?>
+
+<?import javafx.scene.image.*?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.shape.*?>
+
+<?import javafx.scene.text.*?>
+
+<?import javafx.scene.paint.*?>
+
+<?import java.lang.String?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+         xmlns:fx="http://javafx.com/fxml"
+         fx:controller="com.example.app.DrinkSelectController"
+         prefWidth="900" prefHeight="480">
+
+<!-- Top header -->
+<top>
+    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #2b2b2b; -fx-padding: 10;">
+        <Label text="home /drink select" textFill="white">
+            <font>
+                <Font size="14"/>
+            </font>
+        </Label>
+    </HBox>
+</top>
+
+<!-- Left sidebar -->
+<left>
+    <VBox spacing="12" padding="12" prefWidth="220" style="-fx-background-color: #1f1f1f;">
+        <!-- Worker name -->
+        <HBox alignment="CENTER_LEFT" spacing="6">
+            <Label text="⚙" textFill="white"/>
+            <TextField fx:id="workerNameField" promptText="Worker Name" prefWidth="160"/>
+        </HBox>
+
+        <Separator/>
+
+        <!-- Order area -->
+        <Label text="Order #" textFill="white"/>
+        <ListView fx:id="orderListView" prefHeight="220" style="-fx-background-color: #ffffff;">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Boba Milk Tea — $4.50"/>
+                    <String fx:value="Mango Smoothie — $5.00"/>
+                </FXCollections>
+            </items>
+        </ListView>
+
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="Total" textFill="white"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="totalLabel" text="$ -" textFill="white"/>
+        </HBox>
+
+        <Button fx:id="checkoutButton" text="Checkout" maxWidth="Infinity"/>
+    </VBox>
+</left>
+
+<!-- Center grid -->
+<center>
+    <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-padding: 12;">
+        <GridPane fx:id="productGrid" hgap="18" vgap="18" padding="12" alignment="TOP_CENTER">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="33.33"/>
+                <ColumnConstraints percentWidth="33.33"/>
+                <ColumnConstraints percentWidth="33.33"/>
+            </columnConstraints>
+
+            <!-- 3x3 product placeholders -->
+            <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+            <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+            <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+
+            <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+            <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+            <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+
+            <VBox GridPane.columnIndex="0" GridPane.rowIndex="2" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+            <VBox GridPane.columnIndex="1" GridPane.rowIndex="2" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+            <VBox GridPane.columnIndex="2" GridPane.rowIndex="2" alignment="TOP_CENTER" spacing="6">
+                <Rectangle width="150" height="100" arcWidth="4" arcHeight="4" fill="#bdbdbd"/>
+                <Label text="Drink Name" textFill="white"/>
+                <Separator/>
+            </VBox>
+        </GridPane>
+    </ScrollPane>
+</center>
+
+<!-- Right sidebar -->
+<right>
+    <VBox spacing="12" padding="12" alignment="TOP_CENTER" prefWidth="120" style="-fx-background-color: #1f1f1f;">
+        <Button text="Milk Teas" prefWidth="96"/>
+        <Button text="Fruit Teas" prefWidth="96"/>
+        <Button text="Blended" prefWidth="96"/>
+        <Button text="Non - Caff" prefWidth="96"/>
+        <Button text="Customize" prefWidth="96"/>
+        <Button text="Toppings" prefWidth="96"/>
+    </VBox>
+</right>
+```
+
+</BorderPane>
