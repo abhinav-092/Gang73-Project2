@@ -1,3 +1,7 @@
-com\example\app\dbSetup.class
+com\example\app\MainApp.class
+com\example\app\JdbcPostgreSQLView.class
 com\example\app\JdbcPostgreSQLFXGUI.class
 com\example\app\JdbcPostgreSQLFX.class
+com\example\app\DrinkSelectController.class
+com\example\app\dbSetup.class
+com\example\app\JdbcController.class
