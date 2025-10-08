@@ -31,7 +31,7 @@ public class HomeController extends VBox {
 
     // Blended buttons
     public Button taroBLButton, mangoBLButton, strawberryBLButton, matchaBLButton, coffeeBLButton, honeydewBLButton;
-
+    
     // Customize toggle buttons
     public ToggleButton iceToggleNone, iceToggleLess, iceToggleRegular, iceToggleExtra;
     public ToggleButton sweetToggleNone, sweetToggleLess, sweetToggleRegular, sweetToggleExtra;
@@ -42,6 +42,9 @@ public class HomeController extends VBox {
 
     // === Added: New Drink Button ===
     private Button newDrinkButton;
+
+    // === ADDED: Total Price Label ===
+    private Label totalPriceLabel;
 
     // CHANGED: Track selected drink and currently selected button for visual feedback
     private String selectedDrink = null;
@@ -55,6 +58,11 @@ public class HomeController extends VBox {
 
     // Database connection info
     DatabaseService db;
+
+    // >>> ADDED FOR LOGOUT
+    private Runnable logoutHandler;
+    public void setLogoutHandler(Runnable logoutHandler) { this.logoutHandler = logoutHandler; }
+    // <<< ADDED FOR LOGOUT
 
     public HomeController() {
         initialize();
@@ -110,6 +118,15 @@ public class HomeController extends VBox {
         managerModeButton.setFont(new Font(18));
 
         leftPane.getChildren().addAll(orderTable, orderLabel, orderNumberField, employeeNameField, managerModeButton);
+
+        // >>> ADDED FOR LOGOUT (button on left panel)
+        Button logoutButton = new Button("Logout");
+        logoutButton.setLayoutX(160);
+        logoutButton.setLayoutY(15);
+        logoutButton.setPrefSize(80, 41);
+        logoutButton.setOnAction(e -> { if (logoutHandler != null) logoutHandler.run(); });
+        leftPane.getChildren().add(logoutButton);
+        // <<< ADDED FOR LOGOUT
 
         // Right AnchorPane (TabPane)
         AnchorPane rightPane = new AnchorPane();
@@ -250,11 +267,19 @@ public class HomeController extends VBox {
         leftPane.getChildren().add(placeOrderButton);
 
         // === Added: New Drink Button setup ===
-        newDrinkButton = new Button("New Drink");
+        newDrinkButton = new Button("Add Drink");
         newDrinkButton.setLayoutX(127);
         newDrinkButton.setLayoutY(470);
         newDrinkButton.setPrefSize(100, 40);
         leftPane.getChildren().add(newDrinkButton);
+
+        // === ADDED: Total Price Label setup ===
+        totalPriceLabel = new Label("Total: $0.00");
+        totalPriceLabel.setLayoutX(12);
+        totalPriceLabel.setLayoutY(520);
+        totalPriceLabel.setFont(new Font(16));
+        totalPriceLabel.setStyle("-fx-font-weight: bold;");
+        leftPane.getChildren().add(totalPriceLabel);
 
         newDrinkButton.setOnAction(e -> startNewDrink());
         
@@ -266,6 +291,7 @@ public class HomeController extends VBox {
                 // Clear current order and table
                 currentOrderDrinks.clear();
                 orderData.clear();
+                updateTotalPrice(); // === ADDED: Reset total price to $0.00 ===
                 System.out.println("Order placed successfully!");
             } else {
                 System.out.println("No drinks in current order.");
@@ -300,6 +326,8 @@ public class HomeController extends VBox {
                 System.out.println("New drink added: " + selectedDrink + " - $" + price);
                 System.out.println("Customizations - Ice: " + iceLevel + ", Sweet: " + sweetnessLevel + ", Milk: " + milkType);
                 
+                updateTotalPrice(); // === ADDED: Update total price after adding drink ===
+                
                 // Reset selections for next drink
                 resetSelections();
                 
@@ -325,6 +353,15 @@ public class HomeController extends VBox {
         iceToggleRegular.setSelected(true);
         sweetToggleRegular.setSelected(true);
         wholeMilkToggle.setSelected(true);
+    }
+
+    // === ADDED: Method to calculate and update total price display ===
+    private void updateTotalPrice() {
+        double total = 0.0;
+        for (DrinkConfig drink : currentOrderDrinks) {
+            total += drink.price;
+        }
+        totalPriceLabel.setText(String.format("Total: $%.2f", total));
     }
 
     private double getDrinkPriceFromDB(String drinkName) throws SQLException {

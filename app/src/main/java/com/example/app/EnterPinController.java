@@ -2,8 +2,12 @@ package com.example.app;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +40,12 @@ public class EnterPinController extends BorderPane {
         this.accessApplier = accessApplier;
     }
 
+    /** Clears PIN field and status; called on Logout */
+    public void reset() {
+        if (pinField != null) pinField.clear();
+        if (statusLabel != null) statusLabel.setText("");
+    }
+
     private void initialize() {
         this.setPrefSize(300, 400);
 
@@ -47,7 +57,7 @@ public class EnterPinController extends BorderPane {
 
         pinField = new PasswordField();
         pinField.setPromptText("••••");
-        pinField.setEditable(false);
+        pinField.setEditable(false);      // keypad-only input
         pinField.setMaxWidth(180);
 
         GridPane grid = new GridPane();
@@ -114,26 +124,29 @@ public class EnterPinController extends BorderPane {
             return;
         }
 
-        // Get is_manager (0/1) for this employee
-        String sql = "SELECT is_manager FROM employees WHERE Employee_ID = ?";
-
+        // Ensure connection is open
         try {
-            if (!dbService.isConnected()){
+            Connection conn = dbService.getConnection();
+            if (conn == null || conn.isClosed()) {
                 dbService.connect();
             }
-            PreparedStatement stmt = dbService.getConnection().prepareStatement(sql);
-            System.out.println(stmt);
+        } catch (SQLException ignore) { /* handled on query below */ }
+
+        // Get is_manager (boolean) for this employee
+        String sql = "SELECT is_manager FROM employees WHERE Employee_ID = ?";
+
+        try (PreparedStatement stmt = dbService.getConnection().prepareStatement(sql)) {
             stmt.setInt(1, empId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    boolean isManager = rs.getBoolean("is_manager");
+                    boolean isManager = rs.getBoolean("is_manager"); // Postgres boolean
                     statusLabel.setText("Login successful!");
                     pinField.clear();
 
                     // Tell MainApp to enable/disable tabs based on role
                     if (accessApplier != null) accessApplier.accept(isManager);
 
-                    // Go to Home (MainApp has already unlocked appropriate tabs)
+                    // Select first tab (Home). MainApp already unlocked it.
                     if (tabPane != null) tabPane.getSelectionModel().selectFirst();
                 } else {
                     statusLabel.setText("Invalid Employee ID!");

@@ -34,23 +34,27 @@ public class MainApp extends Application {
         pinController.setTabPane(tabPane);
         pinTab.setContent(pinController);
 
-
         Tab inventoryTab = new Tab("Inventory");
         InventoryController inventoryController = new InventoryController();
         inventoryController.setDatabaseService(dbService);
         inventoryTab.setContent(inventoryController);
 
         Tab orderHistoryTab = new Tab("Order History");
-        OrderHistoryController OrderHistoryController = new OrderHistoryController();
-        OrderHistoryController.setDatabaseService(dbService); // This must be called!
-        orderHistoryTab.setContent(OrderHistoryController);
+        OrderHistoryController orderHistoryController = new OrderHistoryController();
+        orderHistoryController.setDatabaseService(dbService);
+        orderHistoryTab.setContent(orderHistoryController);
 
         Tab trendsTab = new Tab("Order Trends");
         TrendsController trendsController = new TrendsController();
         trendsTab.setContent(trendsController);
 
+        Tab menuTab = new Tab("Menu");
+        MenuController menuController = new MenuController();
+        menuController.setDatabaseService(dbService);
+        menuTab.setContent(menuController);
+
         // Add tabs to the pane (order matters: Home first works with selectFirst())
-        tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab);
+        tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab, menuTab);
 
         // Start on PIN, lock everything else
         tabPane.getSelectionModel().select(pinTab);
@@ -59,6 +63,7 @@ public class MainApp extends Application {
         inventoryTab.setDisable(true);
         orderHistoryTab.setDisable(true);
         trendsTab.setDisable(true);
+        menuTab.setDisable(true);
 
         // When PIN succeeds, apply access:
         // - Manager: enable all
@@ -73,26 +78,46 @@ public class MainApp extends Application {
                 inventoryTab.setDisable(false);
                 orderHistoryTab.setDisable(false);
                 trendsTab.setDisable(false);
+                menuTab.setDisable(false);
             } else {
                 homeTab.setDisable(false);
                 empTab.setDisable(true);
                 inventoryTab.setDisable(true);
                 orderHistoryTab.setDisable(true);
                 trendsTab.setDisable(true);
+                menuTab.setDisable(true); // keep Menu locked for non-managers
             }
 
             // Jump to Home explicitly
             tabPane.getSelectionModel().select(homeTab);
         });
 
-        // Stage/Scene
+        // === Wire Logout from Home ===
+        homeController.setLogoutHandler(() -> {
+            // Lock everything except PIN
+            homeTab.setDisable(true);
+            empTab.setDisable(true);
+            inventoryTab.setDisable(true);
+            orderHistoryTab.setDisable(true);
+            trendsTab.setDisable(true);
+            menuTab.setDisable(true);
+
+            // Re-enable PIN and reset its UI
+            pinTab.setDisable(false);
+            pinController.reset();
+
+            // Go back to PIN
+            tabPane.getSelectionModel().select(pinTab);
+        });
+
+        // Optional: pass TabPane into other controllers that navigate tabs
         employeesController.setTabNavigator(tabPane);
         inventoryController.setTabNavigator(tabPane);
-        OrderHistoryController.setTabNavigator(tabPane);
+        orderHistoryController.setTabNavigator(tabPane);
         trendsController.setTabNavigator(tabPane);
-        
+        menuController.setTabNavigator(tabPane);
 
-        // === Create Scene and show Stage ===
+        // Scene/Stage
         Scene scene = new Scene(tabPane, 1000, 600);
         stage.setScene(scene);
         stage.setTitle("POS System");
