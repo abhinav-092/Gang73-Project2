@@ -115,26 +115,66 @@ public class InventoryController extends BorderPane {
     }
     
     private HBox createTopBar() {
-        HBox topBar = new HBox();
-        topBar.setPadding(new Insets(0, 0, 20, 0));
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        
-        Label titleLabel = new Label("Inventory");
-        titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
-        
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        
-        Button logoutBtn = new Button("⎋");
-        logoutBtn.setStyle("-fx-font-size: 24px; -fx-background-color: transparent; " +
-                          "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
-                          "-fx-padding: 5 15;");
-        logoutBtn.setOnAction(e -> handleLogout());
-        
-        topBar.getChildren().addAll(titleLabel, spacer, logoutBtn);
-        
-        return topBar;
-    }
+    HBox topBar = new HBox();
+    topBar.setPadding(new Insets(0, 0, 20, 0));
+    topBar.setAlignment(Pos.CENTER_LEFT);
+
+    Label titleLabel = new Label("Inventory");
+    titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+    // Add Item button
+    Button addItemBtn = new Button("+ Add Item");
+    addItemBtn.setStyle("-fx-font-size: 14px; -fx-background-color: white; " +
+                        "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
+                        "-fx-padding: 8 20;");
+    addItemBtn.setOnAction(e -> showAddItemDialog());
+
+    // Update Item button
+    Button updateItemBtn = new Button("Update Item");
+    updateItemBtn.setStyle("-fx-font-size: 14px; -fx-background-color: white; " +
+                           "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
+                           "-fx-padding: 8 20;");
+    updateItemBtn.setOnAction(e -> {
+        InventoryItem selected = table.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            showUpdateDialog(selected);
+        } else {
+            showError("Selection Error", "Please select an item to update");
+        }
+    });
+
+    // Delete Item button
+    Button deleteItemBtn = new Button("Delete Item");
+    deleteItemBtn.setStyle("-fx-font-size: 14px; -fx-background-color: white; " +
+                           "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
+                           "-fx-padding: 8 20;");
+    deleteItemBtn.setOnAction(e -> {
+        InventoryItem selected = table.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            deleteItem(selected);
+        } else {
+            showError("Selection Error", "Please select an item to delete");
+        }
+    });
+
+    Button logoutBtn = new Button("⎋");
+    logoutBtn.setStyle("-fx-font-size: 24px; -fx-background-color: transparent; " +
+                       "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
+                       "-fx-padding: 5 15;");
+    logoutBtn.setOnAction(e -> handleLogout());
+
+    HBox buttonBox = new HBox(10);
+    buttonBox.setAlignment(Pos.CENTER_RIGHT);
+    buttonBox.getChildren().addAll(addItemBtn, updateItemBtn, deleteItemBtn, logoutBtn);
+
+    topBar.getChildren().addAll(titleLabel, spacer, buttonBox);
+
+    return topBar;
+}
+
     
     private VBox createTableSection() {
         VBox tableBox = new VBox();
@@ -318,6 +358,117 @@ public class InventoryController extends BorderPane {
         }
     }
     
+    /**
+     * Shows a dialog to add a new inventory item to the database
+     */
+    private void showAddItemDialog() {
+        Dialog<InventoryItem> dialog = new Dialog<>();
+        dialog.setTitle("Add New Item");
+        dialog.setHeaderText("Enter details for the new inventory item");
+        
+        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+        
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+        
+        TextField nameField = new TextField();
+        nameField.setPromptText("Ingredient name");
+        TextField onHandField = new TextField("0");
+        TextField requiredField = new TextField("0");
+        TextField unitField = new TextField();
+        unitField.setPromptText("e.g., oz, lbs, units");
+        TextField priceField = new TextField("0.0");
+        
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Amount on Hand:"), 0, 1);
+        grid.add(onHandField, 1, 1);
+        grid.add(new Label("Amount Required:"), 0, 2);
+        grid.add(requiredField, 1, 2);
+        grid.add(new Label("Unit:"), 0, 3);
+        grid.add(unitField, 1, 3);
+        grid.add(new Label("Price per Unit:"), 0, 4);
+        grid.add(priceField, 1, 4);
+        
+        dialog.getDialogPane().setContent(grid);
+        
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                try {
+                    String name = nameField.getText().trim();
+                    if (name.isEmpty()) {
+                        showError("Input Error", "Name cannot be empty");
+                        return null;
+                    }
+                    
+                    int onHand = Integer.parseInt(onHandField.getText());
+                    int required = Integer.parseInt(requiredField.getText());
+                    String unit = unitField.getText().trim();
+                    double price = Double.parseDouble(priceField.getText());
+                    
+                    // Create temporary item with ID 0 (will be assigned by database)
+                    return new InventoryItem(0, name, onHand, required, unit, price);
+                } catch (NumberFormatException e) {
+                    showError("Input Error", "Please enter valid numbers");
+                    return null;
+                }
+            }
+            return null;
+        });
+        
+        dialog.showAndWait().ifPresent(newItem -> addItemToDatabase(newItem));
+    }
+    
+    /**
+     * Adds a new item to the database
+     * EDIT THE SQL QUERY BELOW TO MATCH YOUR DATABASE SCHEMA
+     */
+    private void addItemToDatabase(InventoryItem newItem) {
+        if (dbService == null) {
+            showError("Database Error", "Database service not initialized");
+            return;
+        }
+        
+        try {
+            // EDIT THIS CONNECTION LINE IF YOU USE A DIFFERENT DATABASE OBJECT
+            Connection conn = dbService.getConnection();
+            
+            // EDIT THIS SQL QUERY TO MATCH YOUR TABLE STRUCTURE
+            // Current query assumes auto-increment for Ingredient_ID
+            String query = "INSERT INTO inventory (ingredient_name, amount_on_hand, amount_required, unit, price_per_unit) VALUES (?, ?, ?, ?, ?)";
+            
+            PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setString(1, newItem.getName());
+            pstmt.setInt(2, newItem.getAmountOnHand());
+            pstmt.setInt(3, newItem.getAmountRequired());
+            pstmt.setString(4, newItem.getUnit());
+            pstmt.setDouble(5, newItem.getPricePerUnit());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                // Get the generated ID
+                ResultSet generatedKeys = pstmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    newItem.setIngredientId(generatedKeys.getInt(1));
+                }
+                
+                // Add to observable list and refresh table
+                data.add(newItem);
+                table.refresh();
+                
+                showInfo("Success", "Item added successfully!");
+            }
+            
+        } catch (SQLException e) {
+            showError("Database Error", "Failed to add item: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     private void showStockEntryDialog(InventoryItem item) {
         Dialog<Integer> dialog = new Dialog<>();
         dialog.setTitle("Stock Entry");
@@ -457,6 +608,14 @@ public class InventoryController extends BorderPane {
     
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void showInfo(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

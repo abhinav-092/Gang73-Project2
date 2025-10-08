@@ -122,7 +122,6 @@ public class EnterPinController extends BorderPane {
                 dbService.connect();
             }
             PreparedStatement stmt = dbService.getConnection().prepareStatement(sql);
-            System.out.println(stmt);
             stmt.setInt(1, empId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {

@@ -291,7 +291,6 @@ public class EmployeesController extends BorderPane {
                         rs.getString("is_manager"));
                 data.add(emp);
                 count++;
-                System.out.println("Loaded: " + emp.getName());
             }
 
             System.out.println("Total employees loaded: " + count);

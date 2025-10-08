@@ -11,5 +11,12 @@ CREATE TABLE inventory(
 );
 
 \copy inventory FROM 'Csv_files/inventory.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+
+SELECT setval(
+    pg_get_serial_sequence('inventory', 'ingredient_id'),
+    COALESCE((SELECT MAX(ingredient_id) + 1 FROM inventory), 1),
+    false
+);
+
 --Display changes
 SELECT * FROM inventory;
