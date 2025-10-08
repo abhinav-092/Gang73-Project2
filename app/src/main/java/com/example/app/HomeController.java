@@ -6,6 +6,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +17,8 @@ import java.util.List;
 
 public class HomeController extends VBox {
 
-    public TableView<String> orderTable;
+    // === CHANGED: TableView now stores OrderItem objects instead of raw types ===
+    public TableView<OrderItem> orderTable;
     public TextField orderNumberField, employeeNameField;
     public Button managerModeButton;
 
@@ -35,11 +40,18 @@ public class HomeController extends VBox {
     // Place Order Button
     private Button placeOrderButton;
 
-    // Track selected drink
-    private String selectedDrink = null;
+    // === Added: New Drink Button ===
+    private Button newDrinkButton;
 
-    // Optional local storage
-    private List<Order> currentOrders = new ArrayList<>();
+    // CHANGED: Track selected drink and currently selected button for visual feedback
+    private String selectedDrink = null;
+    private Button currentlySelectedButton = null;
+
+    // CHANGED: Store current drink configuration with all customizations
+    private List<DrinkConfig> currentOrderDrinks = new ArrayList<>();
+
+    // === NEW: Observable list for TableView items ===
+    private ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
 
     // Database connection info
     DatabaseService db;
@@ -62,11 +74,18 @@ public class HomeController extends VBox {
         orderTable.setLayoutX(12);
         orderTable.setLayoutY(108);
         orderTable.setPrefSize(215, 346);
-        TableColumn<String, String> itemCol = new TableColumn<>("item");
+
+        // === CHANGED: Proper TableColumns for OrderItem ===
+        TableColumn<OrderItem, String> itemCol = new TableColumn<>("item");
+        itemCol.setCellValueFactory(data -> data.getValue().itemNameProperty());
         itemCol.setPrefWidth(105.8);
-        TableColumn<String, String> priceCol = new TableColumn<>("price");
+
+        TableColumn<OrderItem, String> priceCol = new TableColumn<>("price");
+        priceCol.setCellValueFactory(data -> data.getValue().priceProperty());
         priceCol.setPrefWidth(109.18);
+
         orderTable.getColumns().addAll(itemCol, priceCol);
+        orderTable.setItems(orderData); // bind observable list
 
         Label orderLabel = new Label("Order #");
         orderLabel.setLayoutX(10);
@@ -227,45 +246,145 @@ public class HomeController extends VBox {
         placeOrderButton = new Button("Place Order");
         placeOrderButton.setLayoutX(12);
         placeOrderButton.setLayoutY(470);
-        placeOrderButton.setPrefSize(215, 40);
+        placeOrderButton.setPrefSize(100, 40);
         leftPane.getChildren().add(placeOrderButton);
+
+        // === Added: New Drink Button setup ===
+        newDrinkButton = new Button("New Drink");
+        newDrinkButton.setLayoutX(127);
+        newDrinkButton.setLayoutY(470);
+        newDrinkButton.setPrefSize(100, 40);
+        leftPane.getChildren().add(newDrinkButton);
+
+        newDrinkButton.setOnAction(e -> startNewDrink());
+        
+        // CHANGED: Place Order button now processes all drinks in currentOrderDrinks list
         placeOrderButton.setOnAction(e -> {
-            Order order = getCurrentOrder();
-            if (order.drink != null) {
-                currentOrders.add(order);
-                orderTable.getItems().add(order.drink + " - " + order.milk); // simple display
-                insertOrderToDB(order);
+            if (!currentOrderDrinks.isEmpty()) {
+                // Insert all drinks into database
+                for (DrinkConfig config : currentOrderDrinks) {
+                    insertOrderToDB(config);
+                }
+                // Clear current order and table
+                currentOrderDrinks.clear();
+                orderData.clear();
+                System.out.println("Order placed successfully!");
+            } else {
+                System.out.println("No drinks in current order.");
             }
         });
     }
 
-    // ===== Button helpers =====
-    private void setupAllDrinkButtons() {
-        setupDrinkButton(classicMTButton, "Classic");
-        setupDrinkButton(taroMTButton, "Taro");
-        setupDrinkButton(honeydewMTButton, "Honeydew");
-        setupDrinkButton(thaiMTButton, "Thai");
-        setupDrinkButton(brownSugarMTButton, "Brown Sugar");
-        setupDrinkButton(matchaMTButton, "Matcha");
-        setupDrinkButton(coffeeMTButton, "Coffee");
-        setupDrinkButton(strawberryMTButton, "Strawberry");
-
-        setupDrinkButton(passionfruitFTButton, "Passionfruit Green");
-        setupDrinkButton(mangoFTButton, "Mango Green");
-        setupDrinkButton(lycheeFTButton, "Lychee Green");
-        setupDrinkButton(strawberryFTButton, "Strawberry Green");
-        setupDrinkButton(wintermelonFTButton, "Wintermelon");
-
-        setupDrinkButton(taroBLButton, "Taro Blended");
-        setupDrinkButton(mangoBLButton, "Mango Blended");
-        setupDrinkButton(strawberryBLButton, "Strawberry Blended");
-        setupDrinkButton(matchaBLButton, "Matcha Blended");
-        setupDrinkButton(coffeeBLButton, "Coffee Blended");
-        setupDrinkButton(honeydewBLButton, "Honeydew Blended");
+    // CHANGED: startNewDrink now adds drink + customizations to table and stores configuration
+    private void startNewDrink() {
+        if (selectedDrink != null) {
+            try {
+                // Get base price from database
+                double price = getDrinkPriceFromDB(selectedDrink);
+                
+                // Get customization selections
+                String iceLevel = getSelectedToggle(iceToggleNone.getToggleGroup());
+                String sweetnessLevel = getSelectedToggle(sweetToggleNone.getToggleGroup());
+                String milkType = getSelectedToggle(wholeMilkToggle.getToggleGroup());
+                
+                // Create drink configuration and store it
+                DrinkConfig config = new DrinkConfig(selectedDrink, iceLevel, sweetnessLevel, milkType, price);
+                currentOrderDrinks.add(config);
+                
+                // Add drink to table
+                orderData.add(new OrderItem(selectedDrink, String.format("$%.2f", price)));
+                
+                // Add customizations to table (indented for visual clarity)
+                orderData.add(new OrderItem("  Ice: " + iceLevel, ""));
+                orderData.add(new OrderItem("  Sweet: " + sweetnessLevel, ""));
+                orderData.add(new OrderItem("  Milk: " + milkType, ""));
+                
+                System.out.println("New drink added: " + selectedDrink + " - $" + price);
+                System.out.println("Customizations - Ice: " + iceLevel + ", Sweet: " + sweetnessLevel + ", Milk: " + milkType);
+                
+                // Reset selections for next drink
+                resetSelections();
+                
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No drink selected!");
+        }
+    }
+    
+    // CHANGED: New method to reset selections after adding a drink
+    private void resetSelections() {
+        selectedDrink = null;
+        
+        // Clear visual selection from button
+        if (currentlySelectedButton != null) {
+            currentlySelectedButton.setStyle("-fx-border-color: black; -fx-border-style: solid;");
+            currentlySelectedButton = null;
+        }
+        
+        // Reset customizations to defaults
+        iceToggleRegular.setSelected(true);
+        sweetToggleRegular.setSelected(true);
+        wholeMilkToggle.setSelected(true);
     }
 
+    private double getDrinkPriceFromDB(String drinkName) throws SQLException {
+        if (db == null) return 0.0;
+        String sql = "SELECT base_price FROM menu_items WHERE item_name = '" + drinkName + "'";
+        try (ResultSet ps = db.executeQuery(sql)) {
+            if (ps.next()){
+                return ps.getDouble("base_price");
+            }
+            else{
+                System.out.println("Table empty");
+            }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    private void setupAllDrinkButtons() {
+        setupDrinkButton(classicMTButton, "Classic Milk Tea");
+        setupDrinkButton(taroMTButton, "Taro Milk Tea");
+        setupDrinkButton(honeydewMTButton, "Honeydew Milk Tea");
+        setupDrinkButton(thaiMTButton, "Thai Milk Tea");
+        setupDrinkButton(brownSugarMTButton, "Brown Sugar Milk Tea");
+        setupDrinkButton(matchaMTButton, "Matcha Milk Tea");
+        setupDrinkButton(coffeeMTButton, "Coffee Milk Tea");
+        setupDrinkButton(strawberryMTButton, "Strawberry Milk Tea");
+        setupDrinkButton(passionfruitFTButton, "Passion Fruit Green Tea");
+        setupDrinkButton(mangoFTButton, "Mango Green Tea");
+        setupDrinkButton(lycheeFTButton, "Lychee Green Tea");
+        setupDrinkButton(strawberryFTButton, "Strawberry Green Tea");
+        setupDrinkButton(wintermelonFTButton, "Wintermelon Tea");
+        setupDrinkButton(taroBLButton, "Taro Smoothie");
+        setupDrinkButton(mangoBLButton, "Mango Smoothie");
+        setupDrinkButton(strawberryBLButton, "Strawberry Smoothie");
+        setupDrinkButton(matchaBLButton, "Matcha Smoothie");
+        setupDrinkButton(coffeeBLButton, "Coffee Smoothie");
+        setupDrinkButton(honeydewBLButton, "Honeydew Smoothie");
+    }
+
+    // CHANGED: setupDrinkButton now provides visual feedback and ensures mutual exclusivity
     private void setupDrinkButton(Button button, String drinkName) {
-        button.setOnAction(e -> selectedDrink = drinkName);
+        button.setOnAction(e -> {
+            // Clear previous selection styling
+            if (currentlySelectedButton != null) {
+                currentlySelectedButton.setStyle("-fx-border-color: black; -fx-border-style: solid;");
+            }
+            
+            // Set new selection
+            selectedDrink = drinkName;
+            currentlySelectedButton = button;
+            
+            // Highlight selected button
+            button.setStyle("-fx-border-color: blue; -fx-border-width: 3; -fx-border-style: solid;");
+            
+            System.out.println("Selected drink: " + drinkName);
+        });
     }
 
     private Button createGridButton(String text, int col, int row) {
@@ -289,26 +408,17 @@ public class HomeController extends VBox {
         return toggle;
     }
 
-    // ===== Order handling =====
     private String getSelectedToggle(ToggleGroup group) {
         ToggleButton selected = (ToggleButton) group.getSelectedToggle();
         return selected != null ? selected.getText() : null;
     }
 
-    private Order getCurrentOrder() {
-        return new Order(
-                selectedDrink,
-                getSelectedToggle(iceToggleNone.getToggleGroup()),
-                getSelectedToggle(sweetToggleNone.getToggleGroup()),
-                getSelectedToggle(wholeMilkToggle.getToggleGroup())
-        );
-    }
-
-    public void setDatabaseService(DatabaseService db){
+    public void setDatabaseService(DatabaseService db) {
         this.db = db;
     }
 
-    private void insertOrderToDB(Order order) {
+    // CHANGED: insertOrderToDB now takes DrinkConfig with all customization info
+    private void insertOrderToDB(DrinkConfig config) {
         int lastOrderKey = 0;
         String sql = "SELECT order_key FROM order_summary ORDER BY order_key DESC LIMIT 1";
         try (ResultSet rs = db.executeQuery(sql)) {
@@ -318,28 +428,56 @@ public class HomeController extends VBox {
             } else {
                 System.out.println("Table is empty.");
             }
-        
-
-            sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES ( 1, 1, 1)";
+            // TODO: Update this SQL to properly insert drink and customizations
+            // Use config.drinkName, config.iceLevel, config.sweetnessLevel, config.milkType, config.price
+            sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (1, 1, 1)";
             db.executeUpdate(sql);
-            System.out.println("Order inserted!");
+            System.out.println("Order inserted: " + config.drinkName + " with customizations");
             db.executeQuery("SELECT * FROM order_summary");
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
 
-    // ===== Order class =====
+    // ===== Order class (kept for backwards compatibility) =====
     static class Order {
         String drink, ice, sweetness, milk;
-
         public Order(String drink, String ice, String sweetness, String milk) {
             this.drink = drink;
             this.ice = ice;
             this.sweetness = sweetness;
             this.milk = milk;
         }
+    }
+
+    // CHANGED: New DrinkConfig class to store complete drink configuration including price
+    static class DrinkConfig {
+        String drinkName;
+        String iceLevel;
+        String sweetnessLevel;
+        String milkType;
+        double price;
+        
+        public DrinkConfig(String drinkName, String iceLevel, String sweetnessLevel, String milkType, double price) {
+            this.drinkName = drinkName;
+            this.iceLevel = iceLevel;
+            this.sweetnessLevel = sweetnessLevel;
+            this.milkType = milkType;
+            this.price = price;
+        }
+    }
+
+    // === NEW: Class for table rows ===
+    public static class OrderItem {
+        private final StringProperty itemName;
+        private final StringProperty price;
+
+        public OrderItem(String itemName, String price) {
+            this.itemName = new SimpleStringProperty(itemName);
+            this.price = new SimpleStringProperty(price);
+        }
+
+        public StringProperty itemNameProperty() { return itemName; }
+        public StringProperty priceProperty() { return price; }
     }
 }
