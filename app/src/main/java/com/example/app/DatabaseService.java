@@ -14,6 +14,7 @@ public class DatabaseService {
         System.out.println("Connected to database");
     }
 
+
     public ResultSet executeQuery(String query) throws SQLException {
         Statement stmt = connection.createStatement();
         return stmt.executeQuery(query);

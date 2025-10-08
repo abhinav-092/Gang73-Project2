@@ -33,7 +33,10 @@ public class MainApp extends Application {
         pinTab.setContent(new EnterPinController());
 
         Tab inventoryTab = new Tab("Inventory");
-        inventoryTab.setContent(new InventoryController());
+        InventoryController inventoryController = new InventoryController();
+        inventoryController.setDatabaseService(dbService);  // This must be called!
+        inventoryTab.setContent(inventoryController);
+        
 
         Tab orderHistoryTab = new Tab("Order History");
         orderHistoryTab.setContent(new OrderHistoryController());
