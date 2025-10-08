@@ -312,7 +312,7 @@ public class EmployeesController extends BorderPane {
 
         try {
             Connection conn = dbService.getConnection();
-            String query = "UPDATE \"Employees\" SET \"employee_name\" = ?, \"phone_number\" = ?, \"is_manager\" = ? WHERE \"employee_id\" = ?";
+            String query = "UPDATE \"employees\" SET \"employee_name\" = ?, \"phone_number\" = ?, \"is_manager\" = ? WHERE \"employee_id\" = ?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, emp.getName());
             pstmt.setString(2, emp.getPhoneNumber());
@@ -411,7 +411,7 @@ public class EmployeesController extends BorderPane {
 
         try {
             Connection conn = dbService.getConnection();
-            String query = "INSERT INTO \"Employees\" (\"employee_name\", \"phone_number\", \"is_manager\") VALUES (?, ?, ?)";
+            String query = "INSERT INTO \"employees\" (\"employee_name\", \"phone_number\", \"is_manager\") VALUES (?, ?, ?)";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, emp.getName());
             pstmt.setString(2, emp.getPhoneNumber());
@@ -441,7 +441,7 @@ public class EmployeesController extends BorderPane {
 
                 try {
                     Connection conn = dbService.getConnection();
-                    String query = "DELETE FROM \"Employees\" WHERE \"employee_id\" = ?";
+                    String query = "DELETE FROM \"employees\" WHERE \"employee_id\" = ?";
                     PreparedStatement pstmt = conn.prepareStatement(query);
                     pstmt.setInt(1, emp.getId());
 
