@@ -6,4 +6,5 @@ com\example\app\MainApp.class
 com\example\app\EnterPinController.class
 com\example\app\InventoryController.class
 com\example\app\HomeController.class
+com\example\app\HomeController$Order.class
 com\example\app\dbSetup.class

@@ -21,7 +21,10 @@ public class MainApp extends Application {
         dbService.connect();  // Make sure your DB details are correct
 
         Tab homeTab = new Tab("Home");
-        homeTab.setContent(new HomeController());
+        HomeController homeController = new HomeController();
+        homeController.setDatabaseService(dbService);
+        homeTab.setContent(homeController);
+
 
         Tab empTab = new Tab("Employees");
         empTab.setContent(new EmployeesController());

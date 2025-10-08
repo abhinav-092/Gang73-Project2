@@ -7,9 +7,13 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomeController extends VBox {
 
-    public TableView orderTable;
+    public TableView<String> orderTable;
     public TextField orderNumberField, employeeNameField;
     public Button managerModeButton;
 
@@ -28,6 +32,18 @@ public class HomeController extends VBox {
     public ToggleButton sweetToggleNone, sweetToggleLess, sweetToggleRegular, sweetToggleExtra;
     public ToggleButton wholeMilkToggle, oatMilkToggle, almondMilkToggle;
 
+    // Place Order Button
+    private Button placeOrderButton;
+
+    // Track selected drink
+    private String selectedDrink = null;
+
+    // Optional local storage
+    private List<Order> currentOrders = new ArrayList<>();
+
+    // Database connection info
+    DatabaseService db;
+
     public HomeController() {
         initialize();
     }
@@ -42,7 +58,7 @@ public class HomeController extends VBox {
         // Left AnchorPane
         AnchorPane leftPane = new AnchorPane();
 
-        orderTable = new TableView();
+        orderTable = new TableView<>();
         orderTable.setLayoutX(12);
         orderTable.setLayoutY(108);
         orderTable.setPrefSize(215, 346);
@@ -203,6 +219,53 @@ public class HomeController extends VBox {
 
         this.getChildren().addAll(splitPane, bottomBox);
         VBox.setVgrow(splitPane, Priority.ALWAYS);
+
+        // ===== Setup button actions =====
+        setupAllDrinkButtons();
+
+        // Place Order button
+        placeOrderButton = new Button("Place Order");
+        placeOrderButton.setLayoutX(12);
+        placeOrderButton.setLayoutY(470);
+        placeOrderButton.setPrefSize(215, 40);
+        leftPane.getChildren().add(placeOrderButton);
+        placeOrderButton.setOnAction(e -> {
+            Order order = getCurrentOrder();
+            if (order.drink != null) {
+                currentOrders.add(order);
+                orderTable.getItems().add(order.drink + " - " + order.milk); // simple display
+                insertOrderToDB(order);
+            }
+        });
+    }
+
+    // ===== Button helpers =====
+    private void setupAllDrinkButtons() {
+        setupDrinkButton(classicMTButton, "Classic");
+        setupDrinkButton(taroMTButton, "Taro");
+        setupDrinkButton(honeydewMTButton, "Honeydew");
+        setupDrinkButton(thaiMTButton, "Thai");
+        setupDrinkButton(brownSugarMTButton, "Brown Sugar");
+        setupDrinkButton(matchaMTButton, "Matcha");
+        setupDrinkButton(coffeeMTButton, "Coffee");
+        setupDrinkButton(strawberryMTButton, "Strawberry");
+
+        setupDrinkButton(passionfruitFTButton, "Passionfruit Green");
+        setupDrinkButton(mangoFTButton, "Mango Green");
+        setupDrinkButton(lycheeFTButton, "Lychee Green");
+        setupDrinkButton(strawberryFTButton, "Strawberry Green");
+        setupDrinkButton(wintermelonFTButton, "Wintermelon");
+
+        setupDrinkButton(taroBLButton, "Taro Blended");
+        setupDrinkButton(mangoBLButton, "Mango Blended");
+        setupDrinkButton(strawberryBLButton, "Strawberry Blended");
+        setupDrinkButton(matchaBLButton, "Matcha Blended");
+        setupDrinkButton(coffeeBLButton, "Coffee Blended");
+        setupDrinkButton(honeydewBLButton, "Honeydew Blended");
+    }
+
+    private void setupDrinkButton(Button button, String drinkName) {
+        button.setOnAction(e -> selectedDrink = drinkName);
     }
 
     private Button createGridButton(String text, int col, int row) {
@@ -224,5 +287,59 @@ public class HomeController extends VBox {
         toggle.setToggleGroup(group);
         toggle.setPrefSize(100, 50);
         return toggle;
+    }
+
+    // ===== Order handling =====
+    private String getSelectedToggle(ToggleGroup group) {
+        ToggleButton selected = (ToggleButton) group.getSelectedToggle();
+        return selected != null ? selected.getText() : null;
+    }
+
+    private Order getCurrentOrder() {
+        return new Order(
+                selectedDrink,
+                getSelectedToggle(iceToggleNone.getToggleGroup()),
+                getSelectedToggle(sweetToggleNone.getToggleGroup()),
+                getSelectedToggle(wholeMilkToggle.getToggleGroup())
+        );
+    }
+
+    public void setDatabaseService(DatabaseService db){
+        this.db = db;
+    }
+
+    private void insertOrderToDB(Order order) {
+        int lastOrderKey = 0;
+        String sql = "SELECT order_key FROM order_summary ORDER BY order_key DESC LIMIT 1";
+        try (ResultSet rs = db.executeQuery(sql)) {
+            if (rs.next()) {
+                lastOrderKey = rs.getInt("order_key");
+                System.out.println("Last order key: " + lastOrderKey);
+            } else {
+                System.out.println("Table is empty.");
+            }
+        
+
+            sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES ( 1, 1, 1)";
+            db.executeUpdate(sql);
+            System.out.println("Order inserted!");
+            db.executeQuery("SELECT * FROM order_summary");
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    // ===== Order class =====
+    static class Order {
+        String drink, ice, sweetness, milk;
+
+        public Order(String drink, String ice, String sweetness, String milk) {
+            this.drink = drink;
+            this.ice = ice;
+            this.sweetness = sweetness;
+            this.milk = milk;
+        }
     }
 }
