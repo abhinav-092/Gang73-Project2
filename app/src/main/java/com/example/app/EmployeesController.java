@@ -9,7 +9,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.util.Callback;
-
 import java.sql.*;
 
 public class EmployeesController extends BorderPane {
@@ -33,8 +32,7 @@ public class EmployeesController extends BorderPane {
     }
 
     private void go(String tabTitle) {
-        if (tabNavigator == null)
-            return;
+        if (tabNavigator == null) return;
         tabNavigator.getTabs().stream()
                 .filter(t -> tabTitle.equals(t.getText()))
                 .findFirst()
@@ -42,24 +40,19 @@ public class EmployeesController extends BorderPane {
     }
 
     private void setupUI() {
-        // Left sidebar
         VBox sidebar = createSidebar();
         this.setLeft(sidebar);
 
-        // Center content area
         BorderPane centerArea = new BorderPane();
         centerArea.setStyle("-fx-background-color: white;");
         centerArea.setPadding(new Insets(20));
 
-        // Top bar with title
         HBox topBar = createTopBar();
         centerArea.setTop(topBar);
 
-        // Table section
         VBox tableSection = createTableSection();
         centerArea.setCenter(tableSection);
 
-        // Bottom section with Add Employee button
         HBox bottomSection = createBottomSection();
         centerArea.setBottom(bottomSection);
 
@@ -73,23 +66,22 @@ public class EmployeesController extends BorderPane {
         sidebar.setPadding(new Insets(20));
         sidebar.setSpacing(0);
 
-        // Title
         Label titleLabel = new Label("Employees");
         titleLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px; -fx-padding: 0 0 20 0;");
 
-        // Navigation buttons
-        Button workerNameBtn = createNavButton("Worker Name", false);
         Button inventoryBtn = createNavButton("Inventory", false);
         inventoryBtn.setOnAction(e -> go("Inventory"));
+
         Button trendsBtn = createNavButton("Trends", false);
         trendsBtn.setOnAction(e -> go("Order Trends"));
+
         Button orderHistoryBtn = createNavButton("Order History", false);
         orderHistoryBtn.setOnAction(e -> go("Order History"));
+
         Button employeesBtn = createNavButton("Employees", true);
         employeesBtn.setOnAction(e -> go("Employees"));
 
-        sidebar.getChildren().addAll(titleLabel, workerNameBtn, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
-
+        sidebar.getChildren().addAll(titleLabel, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
         return sidebar;
     }
 
@@ -101,19 +93,12 @@ public class EmployeesController extends BorderPane {
         btn.setPadding(new Insets(10, 10, 10, 20));
 
         if (active) {
-            btn.setStyle("-fx-background-color: #e0e0e0; -fx-text-fill: black; " +
-                    "-fx-font-size: 16px; -fx-border-width: 0; " +
-                    "-fx-background-radius: 0; -fx-cursor: hand;");
+            btn.setStyle("-fx-background-color: #e0e0e0; -fx-text-fill: black; -fx-font-size: 16px;");
         } else {
-            btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
-                    "-fx-font-size: 16px; -fx-border-width: 0; " +
-                    "-fx-background-radius: 0; -fx-cursor: hand;");
-            btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #3c3c3c; -fx-text-fill: white; " +
-                    "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;"));
-            btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
-                    "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;"));
+            btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px;");
+            btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #3c3c3c; -fx-text-fill: white;"));
+            btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white;"));
         }
-
         return btn;
     }
 
@@ -122,20 +107,17 @@ public class EmployeesController extends BorderPane {
         topBar.setPadding(new Insets(0, 0, 20, 0));
         topBar.setAlignment(Pos.CENTER_LEFT);
 
-        Label titleLabel = new Label("Order History");
+        Label titleLabel = new Label("Employees");
         titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Button logoutBtn = new Button("⎋");
-        logoutBtn.setStyle("-fx-font-size: 24px; -fx-background-color: transparent; " +
-                "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
-                "-fx-padding: 5 15;");
+        logoutBtn.setStyle("-fx-font-size: 24px; -fx-background-color: transparent; -fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; -fx-padding: 5 15;");
         logoutBtn.setOnAction(e -> handleLogout());
 
         topBar.getChildren().addAll(titleLabel, spacer, logoutBtn);
-
         return topBar;
     }
 
@@ -147,7 +129,10 @@ public class EmployeesController extends BorderPane {
         table.setEditable(true);
         table.setStyle("-fx-border-color: black; -fx-border-width: 2;");
 
-        // Employee Name Column
+        TableColumn<Employee, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setPrefWidth(100);
+
         TableColumn<Employee, String> nameCol = new TableColumn<>("Employee Name");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         nameCol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -158,13 +143,6 @@ public class EmployeesController extends BorderPane {
         });
         nameCol.setPrefWidth(250);
 
-        // ID Column
-        TableColumn<Employee, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idCol.setPrefWidth(100);
-        idCol.setEditable(false);
-
-        // Phone Number Column
         TableColumn<Employee, String> phoneCol = new TableColumn<>("Phone Number");
         phoneCol.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         phoneCol.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -175,70 +153,39 @@ public class EmployeesController extends BorderPane {
         });
         phoneCol.setPrefWidth(200);
 
-        // Role Column
         TableColumn<Employee, String> roleCol = new TableColumn<>("Role");
-        roleCol.setCellValueFactory(new PropertyValueFactory<>("role"));
-        roleCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        roleCol.setOnEditCommit(event -> {
-            Employee emp = event.getRowValue();
-            emp.setRole(event.getNewValue());
-            updateDatabase(emp);
-        });
+        roleCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().isManager() ? "Manager" : "Employee"));
         roleCol.setPrefWidth(150);
 
-        // Actions Column
         TableColumn<Employee, Void> actionsCol = new TableColumn<>("Actions");
         actionsCol.setPrefWidth(250);
 
-        Callback<TableColumn<Employee, Void>, TableCell<Employee, Void>> cellFactory = new Callback<TableColumn<Employee, Void>, TableCell<Employee, Void>>() {
-            @Override
-            public TableCell<Employee, Void> call(final TableColumn<Employee, Void> param) {
-                final TableCell<Employee, Void> cell = new TableCell<Employee, Void>() {
+        actionsCol.setCellFactory(col -> new TableCell<>() {
+            private final Button editBtn = new Button("Edit");
+            private final Button removeBtn = new Button("Remove");
 
-                    private final Button editBtn = new Button("Edit");
-                    private final Button removeBtn = new Button("Remove");
-
-                    {
-                        editBtn.setStyle("-fx-background-color: white; -fx-border-color: black; " +
-                                "-fx-border-width: 1; -fx-padding: 5 20; -fx-cursor: hand;");
-                        removeBtn.setStyle("-fx-background-color: white; -fx-border-color: black; " +
-                                "-fx-border-width: 1; -fx-padding: 5 20; -fx-cursor: hand;");
-
-                        editBtn.setOnAction(event -> {
-                            Employee emp = getTableView().getItems().get(getIndex());
-                            showEditDialog(emp);
-                        });
-
-                        removeBtn.setOnAction(event -> {
-                            Employee emp = getTableView().getItems().get(getIndex());
-                            removeEmployee(emp);
-                        });
-                    }
-
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            HBox buttons = new HBox(10);
-                            buttons.setAlignment(Pos.CENTER);
-                            buttons.getChildren().addAll(editBtn, removeBtn);
-                            setGraphic(buttons);
-                        }
-                    }
-                };
-                return cell;
+            {
+                editBtn.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-padding: 5 20;");
+                removeBtn.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-padding: 5 20;");
+                editBtn.setOnAction(e -> showEditDialog(getTableView().getItems().get(getIndex())));
+                removeBtn.setOnAction(e -> removeEmployee(getTableView().getItems().get(getIndex())));
             }
-        };
 
-        actionsCol.setCellFactory(cellFactory);
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) setGraphic(null);
+                else {
+                    HBox box = new HBox(10, editBtn, removeBtn);
+                    box.setAlignment(Pos.CENTER);
+                    setGraphic(box);
+                }
+            }
+        });
 
-        table.getColumns().addAll(nameCol, idCol, phoneCol, roleCol, actionsCol);
-
+        table.getColumns().addAll(idCol, nameCol, phoneCol, roleCol, actionsCol);
         tableBox.getChildren().add(table);
         VBox.setVgrow(table, Priority.ALWAYS);
-
         return tableBox;
     }
 
@@ -248,122 +195,92 @@ public class EmployeesController extends BorderPane {
         bottomBox.setAlignment(Pos.CENTER_RIGHT);
 
         Button addBtn = new Button("Add Employee");
-        addBtn.setStyle("-fx-background-color: white; -fx-border-color: black; " +
-                "-fx-border-width: 2; -fx-padding: 10 40; -fx-cursor: hand; " +
-                "-fx-font-size: 14px;");
+        addBtn.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2; -fx-padding: 10 40; -fx-cursor: hand;");
         addBtn.setOnAction(e -> showAddEmployeeDialog());
 
         bottomBox.getChildren().add(addBtn);
-
         return bottomBox;
     }
 
     private void loadDataFromDatabase() {
-        System.out.println("Loading employees from database...");
-
-        if (dbService == null) {
-            System.err.println("ERROR: DatabaseService is null!");
-            showError("Database Error", "Database service not initialized");
-            return;
-        }
-
+        if (dbService == null) return;
         data = FXCollections.observableArrayList();
 
         try {
             Connection conn = dbService.getConnection();
-
-            if (conn == null) {
-                System.err.println("ERROR: Connection is null!");
-                showError("Database Error", "Database connection is null");
-                return;
-            }
-
             String query = "SELECT \"employee_id\", \"employee_name\", \"phone_number\", \"is_manager\" FROM \"employees\" ORDER BY \"employee_id\"";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-
-            int count = 0;
-            while (rs.next()) {
-                Employee emp = new Employee(
-                        rs.getInt("employee_id"),
-                        rs.getString("employee_name"),
-                        rs.getString("phone_number"),
-                        rs.getString("is_manager"));
-                data.add(emp);
-                count++;
+            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
+                while (rs.next()) {
+                    data.add(new Employee(
+                            rs.getInt("employee_id"),
+                            rs.getString("employee_name"),
+                            rs.getString("phone_number"),
+                            rs.getBoolean("is_manager")
+                    ));
+                }
             }
-
-            System.out.println("Total employees loaded: " + count);
             table.setItems(data);
-
         } catch (SQLException e) {
-            System.err.println("SQL Error: " + e.getMessage());
-            showError("Database Error", "Failed to load data: " + e.getMessage());
-            e.printStackTrace();
+            showError("Database Error", "Failed to load employees: " + e.getMessage());
         }
     }
 
     private void updateDatabase(Employee emp) {
-        if (dbService == null) {
-            showError("Database Error", "Database service not initialized");
-            return;
-        }
-
+        if (dbService == null) return;
         try {
             Connection conn = dbService.getConnection();
-            String query = "UPDATE \"employees\" SET \"employee_name\" = ?, \"phone_number\" = ?, \"is_manager\" = ? WHERE \"employee_id\" = ?";
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setString(1, emp.getName());
-            pstmt.setString(2, emp.getPhoneNumber());
-            pstmt.setString(3, emp.getRole());
-            pstmt.setInt(4, emp.getId());
-
-            pstmt.executeUpdate();
+            String query = "UPDATE \"employees\" SET \"employee_name\"=?, \"phone_number\"=?, \"is_manager\"=? WHERE \"employee_id\"=?";
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setString(1, emp.getName());
+                pstmt.setString(2, emp.getPhoneNumber());
+                pstmt.setBoolean(3, emp.isManager());
+                pstmt.setInt(4, emp.getId());
+                pstmt.executeUpdate();
+            }
             table.refresh();
-
         } catch (SQLException e) {
             showError("Update Error", "Failed to update employee: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
-    private void showEditDialog(Employee emp) {
-        Dialog<Employee> dialog = new Dialog<>();
-        dialog.setTitle("Edit Employee");
-        dialog.setHeaderText("Edit details for: " + emp.getName());
-
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
-
-        TextField nameField = new TextField(emp.getName());
-        TextField phoneField = new TextField(emp.getPhoneNumber());
-        TextField roleField = new TextField(emp.getRole());
-
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Phone Number:"), 0, 1);
-        grid.add(phoneField, 1, 1);
-        grid.add(new Label("Role:"), 0, 2);
-        grid.add(roleField, 1, 2);
-
-        dialog.getDialogPane().setContent(grid);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-                emp.setName(nameField.getText());
-                emp.setPhoneNumber(phoneField.getText());
-                emp.setRole(roleField.getText());
-                return emp;
+    private void addEmployeeToDatabase(Employee emp) {
+        if (dbService == null) return;
+        try {
+            Connection conn = dbService.getConnection();
+            String query = "INSERT INTO \"employees\" (\"employee_id\", \"employee_name\", \"phone_number\", \"is_manager\") VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, emp.getId());
+                pstmt.setString(2, emp.getName());
+                pstmt.setString(3, emp.getPhoneNumber());
+                pstmt.setBoolean(4, emp.isManager());
+                pstmt.executeUpdate();
             }
-            return null;
-        });
+            loadDataFromDatabase();
+        } catch (SQLException e) {
+            showError("Insert Error", "Failed to add employee: " + e.getMessage());
+        }
+    }
 
-        dialog.showAndWait().ifPresent(updatedEmp -> updateDatabase(updatedEmp));
+    private void removeEmployee(Employee emp) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Remove");
+        alert.setHeaderText("Remove " + emp.getName() + "?");
+        alert.setContentText("This action cannot be undone.");
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK && dbService != null) {
+                try {
+                    Connection conn = dbService.getConnection();
+                    String query = "DELETE FROM \"employees\" WHERE \"employee_id\" = ?";
+                    try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                        pstmt.setInt(1, emp.getId());
+                        pstmt.executeUpdate();
+                    }
+                    data.remove(emp);
+                } catch (SQLException e) {
+                    showError("Delete Error", "Failed to remove employee: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private void showAddEmployeeDialog() {
@@ -379,93 +296,80 @@ public class EmployeesController extends BorderPane {
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
 
+        TextField idField = new TextField();
         TextField nameField = new TextField();
         TextField phoneField = new TextField();
-        TextField roleField = new TextField();
+        ComboBox<String> roleDropdown = new ComboBox<>();
+        roleDropdown.getItems().addAll("Manager", "Employee");
+        roleDropdown.setValue("Employee");
 
-        grid.add(new Label("Name:"), 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(new Label("Phone Number:"), 0, 1);
-        grid.add(phoneField, 1, 1);
-        grid.add(new Label("Role:"), 0, 2);
-        grid.add(roleField, 1, 2);
+        grid.addRow(0, new Label("Employee ID:"), idField);
+        grid.addRow(1, new Label("Name:"), nameField);
+        grid.addRow(2, new Label("Phone Number:"), phoneField);
+        grid.addRow(3, new Label("Role:"), roleDropdown);
 
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == addButtonType) {
-                return new Employee(0, nameField.getText(), phoneField.getText(), roleField.getText());
+                boolean isManager = roleDropdown.getValue().equals("Manager");
+                int id = Integer.parseInt(idField.getText());
+                return new Employee(id, nameField.getText(), phoneField.getText(), isManager);
             }
             return null;
         });
 
-        dialog.showAndWait().ifPresent(emp -> addEmployeeToDatabase(emp));
+        dialog.showAndWait().ifPresent(this::addEmployeeToDatabase);
     }
 
-    private void addEmployeeToDatabase(Employee emp) {
-        if (dbService == null) {
-            showError("Database Error", "Database service not initialized");
-            return;
-        }
+    private void showEditDialog(Employee emp) {
+        Dialog<Employee> dialog = new Dialog<>();
+        dialog.setTitle("Edit Employee");
+        dialog.setHeaderText("Edit details for: " + emp.getName());
 
-        try {
-            Connection conn = dbService.getConnection();
-            String query = "INSERT INTO \"employees\" (\"employee_name\", \"phone_number\", \"is_manager\") VALUES (?, ?, ?)";
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            pstmt.setString(1, emp.getName());
-            pstmt.setString(2, emp.getPhoneNumber());
-            pstmt.setString(3, emp.getRole());
+        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-            pstmt.executeUpdate();
-            loadDataFromDatabase();
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
 
-        } catch (SQLException e) {
-            showError("Insert Error", "Failed to add employee: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+        TextField idField = new TextField(String.valueOf(emp.getId()));
+        idField.setDisable(true);
+        TextField nameField = new TextField(emp.getName());
+        TextField phoneField = new TextField(emp.getPhoneNumber());
 
-    private void removeEmployee(Employee emp) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Remove");
-        alert.setHeaderText("Remove " + emp.getName() + "?");
-        alert.setContentText("This action cannot be undone.");
+        ComboBox<String> roleDropdown = new ComboBox<>();
+        roleDropdown.getItems().addAll("Manager", "Employee");
+        roleDropdown.setValue(emp.isManager() ? "Manager" : "Employee");
 
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                if (dbService == null) {
-                    showError("Database Error", "Database service not initialized");
-                    return;
-                }
+        grid.addRow(0, new Label("Employee ID:"), idField);
+        grid.addRow(1, new Label("Name:"), nameField);
+        grid.addRow(2, new Label("Phone Number:"), phoneField);
+        grid.addRow(3, new Label("Role:"), roleDropdown);
 
-                try {
-                    Connection conn = dbService.getConnection();
-                    String query = "DELETE FROM \"employees\" WHERE \"employee_id\" = ?";
-                    PreparedStatement pstmt = conn.prepareStatement(query);
-                    pstmt.setInt(1, emp.getId());
+        dialog.getDialogPane().setContent(grid);
 
-                    int rowsAffected = pstmt.executeUpdate();
-                    if (rowsAffected > 0) {
-                        data.remove(emp);
-                    }
-
-                } catch (SQLException e) {
-                    showError("Delete Error", "Failed to remove employee: " + e.getMessage());
-                    e.printStackTrace();
-                }
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                emp.setName(nameField.getText());
+                emp.setPhoneNumber(phoneField.getText());
+                emp.setManager(roleDropdown.getValue().equals("Manager"));
+                return emp;
             }
+            return null;
         });
+
+        dialog.showAndWait().ifPresent(this::updateDatabase);
     }
 
     private void handleLogout() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Logout");
         alert.setHeaderText("Are you sure you want to logout?");
-
         alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                System.out.println("Logging out...");
-            }
+            if (response == ButtonType.OK) System.out.println("Logging out...");
         });
     }
 
@@ -477,50 +381,30 @@ public class EmployeesController extends BorderPane {
         alert.showAndWait();
     }
 
-    // Inner class for Employee
+    // Employee class
     public static class Employee {
         private int id;
         private String name;
         private String phoneNumber;
-        private String role;
+        private boolean isManager;
 
-        public Employee(int id, String name, String phoneNumber, String role) {
+        public Employee(int id, String name, String phoneNumber, boolean isManager) {
             this.id = id;
             this.name = name;
             this.phoneNumber = phoneNumber;
-            this.role = role;
+            this.isManager = isManager;
         }
 
-        public int getId() {
-            return id;
-        }
+        public int getId() { return id; }
+        public void setId(int id) { this.id = id; }
 
-        public void setId(int id) {
-            this.id = id;
-        }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
 
-        public String getName() {
-            return name;
-        }
+        public String getPhoneNumber() { return phoneNumber; }
+        public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getPhoneNumber() {
-            return phoneNumber;
-        }
-
-        public void setPhoneNumber(String phoneNumber) {
-            this.phoneNumber = phoneNumber;
-        }
-
-        public String getRole() {
-            return role;
-        }
-
-        public void setRole(String role) {
-            this.role = role;
-        }
+        public boolean isManager() { return isManager; }
+        public void setManager(boolean manager) { isManager = manager; }
     }
 }
