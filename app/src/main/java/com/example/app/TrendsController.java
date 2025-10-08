@@ -35,7 +35,7 @@ public class TrendsController extends BorderPane {
         this.setPrefSize(900, 600);
 
         // ===== Left Sidebar (match InventoryController) =====
-        this.setLeft(createSidebar());
+        this.setLeft(createSidebar("Order Trends"));
 
         // ===== Center VBox =====
         VBox centerBox = new VBox();
@@ -167,30 +167,45 @@ public class TrendsController extends BorderPane {
         return btn;
     }
 
-    private VBox createSidebar() {
+    private VBox createSidebar(String activeTab) {
         VBox sidebar = new VBox();
         sidebar.setPrefWidth(270);
         sidebar.setStyle("-fx-background-color: #2c2c2c;");
         sidebar.setPadding(new Insets(20));
         sidebar.setSpacing(0);
 
-        // Title
-        Label titleLabel = new Label("Trends");
+        // Title (optional, matches active tab)
+        Label titleLabel = new Label(activeTab);
         titleLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px; -fx-padding: 0 0 20 0;");
 
-        // Navigation buttons (exact tab titles must match MainApp’s tabs)
-        Button workerNameBtn = createNavButton("Worker Name", false);
-        Button inventoryBtn = createNavButton("Inventory", false);
+        // Navigation buttons
+        Button workerNameBtn = createNavButton("Worker Name", activeTab.equals("Worker Name"));
+        Button inventoryBtn = createNavButton("Inventory", activeTab.equals("Inventory"));
         inventoryBtn.setOnAction(e -> go("Inventory"));
-        Button trendsBtn = createNavButton("Trends", true);
+
+        Button menuBtn = createNavButton("Menu", activeTab.equals("Menu"));
+        menuBtn.setOnAction(e -> go("Menu"));
+
+        Button trendsBtn = createNavButton("Trends", activeTab.equals("Order Trends"));
         trendsBtn.setOnAction(e -> go("Order Trends"));
-        Button orderHistoryBtn = createNavButton("Order History", false);
+
+        Button orderHistoryBtn = createNavButton("Order History", activeTab.equals("Order History"));
         orderHistoryBtn.setOnAction(e -> go("Order History"));
-        Button employeesBtn = createNavButton("Employees", false);
+
+        Button employeesBtn = createNavButton("Employees", activeTab.equals("Employees"));
         employeesBtn.setOnAction(e -> go("Employees"));
 
-        sidebar.getChildren().addAll(titleLabel, workerNameBtn, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
-        
+        sidebar.getChildren().addAll(
+            titleLabel,
+            workerNameBtn,
+            inventoryBtn,
+            menuBtn,
+            trendsBtn,
+            orderHistoryBtn,
+            employeesBtn
+        );
+
         return sidebar;
     }
+
 }
