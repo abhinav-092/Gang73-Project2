@@ -26,8 +26,20 @@ public class MainApp extends Application {
         Tab empTab = new Tab("Employees");
         empTab.setContent(new EmployeesController());
 
+        Tab pinTab = new Tab("Enter Pin");
+        pinTab.setContent(new EnterPinController());
+
+        Tab inventoryTab = new Tab("Inventory");
+        inventoryTab.setContent(new InventoryController());
+
+        Tab orderHistoryTab = new Tab("Order History");
+        orderHistoryTab.setContent(new OrderHistoryController());
+
+        Tab trendsTab = new Tab("Order Trends");
+        trendsTab.setContent(new TrendsController());
+
         // === Add all tabs to the TabPane ===
-        tabPane.getTabs().addAll(homeTab, empTab);
+        tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab);
 
         // === Create Scene and show Stage ===
         Scene scene = new Scene(tabPane, 1000, 600);
