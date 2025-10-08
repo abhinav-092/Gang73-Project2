@@ -186,32 +186,32 @@ public class HomeController extends VBox {
         Label iceLabel = new Label("Ice Level");
         iceLabel.setFont(new Font(18));
         ToggleGroup iceGroup = new ToggleGroup();
-        iceToggleNone = createToggle("None", iceGroup);
-        iceToggleLess = createToggle("Less", iceGroup);
-        iceToggleRegular = createToggle("Regular", iceGroup);
+        iceToggleNone = createToggle("No Ice", iceGroup);
+        iceToggleLess = createToggle("Less Ice", iceGroup);
+        iceToggleRegular = createToggle("Regular Ice", iceGroup);
         iceToggleRegular.setSelected(true);
-        iceToggleExtra = createToggle("Extra", iceGroup);
+        iceToggleExtra = createToggle("Extra Ice", iceGroup);
         HBox iceBox = new HBox(10, iceToggleNone, iceToggleLess, iceToggleRegular, iceToggleExtra);
 
         // Sweetness Level
         Label sweetLabel = new Label("Sweetness Level");
         sweetLabel.setFont(new Font(18));
         ToggleGroup sweetGroup = new ToggleGroup();
-        sweetToggleNone = createToggle("None", sweetGroup);
-        sweetToggleLess = createToggle("Less", sweetGroup);
-        sweetToggleRegular = createToggle("Regular", sweetGroup);
+        sweetToggleNone = createToggle("No Sugar", sweetGroup);
+        sweetToggleLess = createToggle("Low Sugar", sweetGroup);
+        sweetToggleRegular = createToggle("Regular Sugar", sweetGroup);
         sweetToggleRegular.setSelected(true);
-        sweetToggleExtra = createToggle("Extra", sweetGroup);
+        sweetToggleExtra = createToggle("Extra Sugar", sweetGroup);
         HBox sweetBox = new HBox(10, sweetToggleNone, sweetToggleLess, sweetToggleRegular, sweetToggleExtra);
 
         // Milk Type
         Label milkLabel = new Label("Milk Type");
         milkLabel.setFont(new Font(18));
         ToggleGroup milkGroup = new ToggleGroup();
-        wholeMilkToggle = createToggle("Whole", milkGroup);
+        wholeMilkToggle = createToggle("Whole Milk", milkGroup);
         wholeMilkToggle.setSelected(true);
-        oatMilkToggle = createToggle("Oat", milkGroup);
-        almondMilkToggle = createToggle("Almond", milkGroup);
+        oatMilkToggle = createToggle("Oat Milk", milkGroup);
+        almondMilkToggle = createToggle("Almond Milk", milkGroup);
         HBox milkBox = new HBox(10, wholeMilkToggle, oatMilkToggle, almondMilkToggle);
 
         customizeBox.getChildren().addAll(iceLabel, iceBox, sweetLabel, sweetBox, milkLabel, milkBox);
@@ -262,9 +262,7 @@ public class HomeController extends VBox {
         placeOrderButton.setOnAction(e -> {
             if (!currentOrderDrinks.isEmpty()) {
                 // Insert all drinks into database
-                for (DrinkConfig config : currentOrderDrinks) {
-                    insertOrderToDB(config);
-                }
+                insertOrderToDB();
                 // Clear current order and table
                 currentOrderDrinks.clear();
                 orderData.clear();
@@ -418,23 +416,74 @@ public class HomeController extends VBox {
     }
 
     // CHANGED: insertOrderToDB now takes DrinkConfig with all customization info
-    private void insertOrderToDB(DrinkConfig config) {
-        int lastOrderKey = 0;
-        String sql = "SELECT order_key FROM order_summary ORDER BY order_key DESC LIMIT 1";
-        try (ResultSet rs = db.executeQuery(sql)) {
+    private void insertOrderToDB() {
+        double total_price = 0;
+        int combo_ID;
+        int order_num = 0;
+
+        for (DrinkConfig drink : currentOrderDrinks){
+            total_price += drink.price;
+        }
+        try {
+            String sql = "INSERT INTO orders (order_date, order_time, total_price, employee_ID) VALUES ('10/08/2025', '01:55 PM', " + total_price + ", 0000)";
+            db.executeUpdate(sql);
+
+            sql = "SELECT order_number FROM orders ORDER BY order_number DESC LIMIT 1";
+            ResultSet rs = db.executeQuery(sql);
             if (rs.next()) {
-                lastOrderKey = rs.getInt("order_key");
-                System.out.println("Last order key: " + lastOrderKey);
+                order_num = rs.getInt("order_number");
             } else {
                 System.out.println("Table is empty.");
             }
-            // TODO: Update this SQL to properly insert drink and customizations
-            // Use config.drinkName, config.iceLevel, config.sweetnessLevel, config.milkType, config.price
-            sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (1, 1, 1)";
-            db.executeUpdate(sql);
-            System.out.println("Order inserted: " + config.drinkName + " with customizations");
-            db.executeQuery("SELECT * FROM order_summary");
-        } catch (SQLException e) {
+
+            for (DrinkConfig drink : currentOrderDrinks){
+                int item_ID = 0;
+                combo_ID = 0;
+                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.drinkName + "'";
+                rs = db.executeQuery(sql);
+                if (rs.next()) {
+                    item_ID = rs.getInt("item_ID");
+                } else {
+                    System.out.println("Table is empty.");
+                }
+                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
+                db.executeUpdate(sql);
+                combo_ID++;
+
+                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.iceLevel + "'";
+                rs = db.executeQuery(sql);
+                if (rs.next()) {
+                    item_ID = rs.getInt("item_ID");
+                } else {
+                    System.out.println("Table is empty.");
+                }
+                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
+                db.executeUpdate(sql);
+                combo_ID++;
+
+                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.sweetnessLevel + "'";
+                rs = db.executeQuery(sql);
+                if (rs.next()) {
+                    item_ID = rs.getInt("item_ID");
+                } else {
+                    System.out.println("Table is empty.");
+                }
+                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
+                db.executeUpdate(sql);
+                combo_ID++;
+
+                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.milkType + "'";
+                rs = db.executeQuery(sql);
+                if (rs.next()) {
+                    item_ID = rs.getInt("item_ID");
+                } else {
+                    System.out.println("Table is empty.");
+                }
+                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
+                db.executeUpdate(sql);
+            }
+        }
+        catch (SQLException e){
             e.printStackTrace();
         }
     }
