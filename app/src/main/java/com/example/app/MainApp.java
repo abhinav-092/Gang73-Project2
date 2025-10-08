@@ -18,7 +18,7 @@ public class MainApp extends Application {
 
         // === Create a single DatabaseService instance and connect ===
         DatabaseService dbService = new DatabaseService();
-        dbService.connect();  // Make sure your DB details are correct
+        dbService.connect(); // Make sure your DB details are correct
 
         Tab homeTab = new Tab("Home");
         HomeController homeController = new HomeController();
@@ -27,7 +27,7 @@ public class MainApp extends Application {
 
         Tab empTab = new Tab("Employees");
         EmployeesController employeesController = new EmployeesController();
-        employeesController.setDatabaseService(dbService);  // This must be called!
+        employeesController.setDatabaseService(dbService); // This must be called!
         empTab.setContent(employeesController);
 
         Tab pinTab = new Tab("Enter Pin");
@@ -35,12 +35,12 @@ public class MainApp extends Application {
 
         Tab inventoryTab = new Tab("Inventory");
         InventoryController inventoryController = new InventoryController();
-        inventoryController.setDatabaseService(dbService);  // This must be called!
+        inventoryController.setDatabaseService(dbService); // This must be called!
         inventoryTab.setContent(inventoryController);
-        
+
         Tab orderHistoryTab = new Tab("Order History");
         OrderHistoryController OrderHistoryController = new OrderHistoryController();
-        OrderHistoryController.setDatabaseService(dbService);  // This must be called!
+        OrderHistoryController.setDatabaseService(dbService); // This must be called!
         orderHistoryTab.setContent(OrderHistoryController);
 
         Tab trendsTab = new Tab("Order Trends");
@@ -48,6 +48,10 @@ public class MainApp extends Application {
 
         // === Add all tabs to the TabPane ===
         tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab);
+
+        employeesController.setTabNavigator(tabPane);
+        inventoryController.setTabNavigator(tabPane);
+        OrderHistoryController.setTabNavigator(tabPane);
 
         // === Create Scene and show Stage ===
         Scene scene = new Scene(tabPane, 1000, 600);
