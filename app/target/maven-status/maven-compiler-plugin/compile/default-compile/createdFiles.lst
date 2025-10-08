@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 com/example/app/OrderHistoryController$OrderInfo.class
 com/example/app/HomeController$Order.class
 com/example/app/OrderHistoryController$OrderRecord.class
@@ -19,3 +20,16 @@ com/example/app/EmployeesController$1.class
 com/example/app/InventoryController$1$1.class
 com/example/app/OrderHistoryController.class
 com/example/app/OrderHistoryController$1.class
+=======
+com\example\app\DatabaseService.class
+com\example\app\EmployeesController.class
+com\example\app\HomeController$OrderItem.class
+com\example\app\TrendsController.class
+com\example\app\HomeController$DrinkConfig.class
+com\example\app\OrderHistoryController.class
+com\example\app\MainApp.class
+com\example\app\EnterPinController.class
+com\example\app\InventoryController.class
+com\example\app\HomeController.class
+com\example\app\HomeController$Order.class
+>>>>>>> main
