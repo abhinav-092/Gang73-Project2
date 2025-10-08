@@ -38,9 +38,10 @@ public class MainApp extends Application {
         inventoryController.setDatabaseService(dbService);  // This must be called!
         inventoryTab.setContent(inventoryController);
         
-
         Tab orderHistoryTab = new Tab("Order History");
-        orderHistoryTab.setContent(new OrderHistoryController());
+        OrderHistoryController OrderHistoryController = new OrderHistoryController();
+        OrderHistoryController.setDatabaseService(dbService);  // This must be called!
+        orderHistoryTab.setContent(OrderHistoryController);
 
         Tab trendsTab = new Tab("Order Trends");
         trendsTab.setContent(new TrendsController());

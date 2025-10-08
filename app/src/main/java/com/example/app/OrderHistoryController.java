@@ -1,142 +1,366 @@
 package com.example.app;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.util.Callback;
+
+import java.sql.*;
+import java.text.NumberFormat;
+import java.util.*;
 
 public class OrderHistoryController extends BorderPane {
 
-    // ===== Left panel buttons =====
-    public Button btnInventory;
-    public Button btnTrends;
-    public Button btnOrderHistory;
-    public Button btnEmployees;
-
-    // ===== Center Table =====
-    public TableView orderHistoryTable;
-    public TableColumn colOrderNumber, colDrinks, colTotal, colDateTime, colActions;
+    private TableView<OrderRecord> table;
+    private ObservableList<OrderRecord> data;
+    private DatabaseService dbService;
 
     public OrderHistoryController() {
-        initialize();
+        setupUI();
     }
 
-    private void initialize() {
-        this.setPrefSize(900, 600);
-
-        // ===== Left AnchorPane (Sidebar) =====
-        AnchorPane leftPane = new AnchorPane();
-        leftPane.setPrefWidth(248);
-
-        Label workerLabel = new Label("Worker Name");
-        workerLabel.setLayoutX(14);
-        workerLabel.setLayoutY(14);
-        workerLabel.setPrefWidth(-1);
-        workerLabel.setFont(new javafx.scene.text.Font(18));
-        workerLabel.setTextFill(javafx.scene.paint.Color.rgb(159, 159, 159));
-
-        Separator separator = new Separator();
-        separator.setLayoutX(14);
-        separator.setLayoutY(50);
-        separator.setPrefWidth(220);
-
-        VBox buttonBox = new VBox(10);
-        buttonBox.setLayoutX(14);
-        buttonBox.setLayoutY(70);
-        buttonBox.setPrefWidth(220);
-
-        btnInventory = createSideButton("Inventory");
-        btnTrends = createSideButton("Trends");
-        btnOrderHistory = createSideButton("Order History");
-        btnEmployees = createSideButton("Employees");
-
-        buttonBox.getChildren().addAll(btnInventory, btnTrends, btnOrderHistory, btnEmployees);
-
-        leftPane.getChildren().addAll(workerLabel, separator, buttonBox);
-
-        // ===== Center VBox (Title + Table) =====
-        VBox centerBox = new VBox(20);
-        centerBox.setPadding(new Insets(20));
-        Label titleLabel = new Label("Order History");
-        titleLabel.setFont(new javafx.scene.text.Font(24));
-
-        orderHistoryTable = new TableView();
-        orderHistoryTable.setPrefSize(850, 500);
-
-        colOrderNumber = new TableColumn("Order number");
-        colOrderNumber.setPrefWidth(120);
-
-        colDrinks = new TableColumn("Drinks");
-        colDrinks.setPrefWidth(250);
-
-        colTotal = new TableColumn("Total");
-        colTotal.setPrefWidth(100);
-
-        colDateTime = new TableColumn("Date/Time");
-        colDateTime.setPrefWidth(150);
-
-        colActions = new TableColumn("Actions");
-        colActions.setPrefWidth(230);
-
-        orderHistoryTable.getColumns().addAll(colOrderNumber, colDrinks, colTotal, colDateTime, colActions);
-
-        centerBox.getChildren().addAll(titleLabel, orderHistoryTable);
-
-        // ===== Top HBox (Exit Label) =====
-        HBox topBox = new HBox();
-        topBox.setAlignment(Pos.CENTER_RIGHT);
-        topBox.setPadding(new Insets(10));
-
-        Label exitLabel = new Label("⎋");
-        exitLabel.setFont(new javafx.scene.text.Font(20));
-        topBox.getChildren().add(exitLabel);
-
-        // ===== Assemble BorderPane =====
-        this.setLeft(leftPane);
-        this.setCenter(centerBox);
-        this.setTop(topBox);
-
-        // ===== Event Handlers & Functional Logic =====
-        btnInventory.setOnAction(e -> handleInventoryClick());
-        btnTrends.setOnAction(e -> handleTrendsClick());
-        btnOrderHistory.setOnAction(e -> handleOrderHistoryClick());
-        btnEmployees.setOnAction(e -> handleEmployeesClick());
-        exitLabel.setOnMouseClicked(e -> handleExitClick());
-
-        // TODO: Populate the TableView with data
-        // TODO: Add action buttons in colActions (like Edit/View)
+    public void setDatabaseService(DatabaseService dbService) {
+        this.dbService = dbService;
+        loadDataFromDatabase();
     }
 
-    private Button createSideButton(String text) {
+    private void setupUI() {
+        // Left sidebar
+        VBox sidebar = createSidebar();
+        this.setLeft(sidebar);
+
+        // Center area
+        BorderPane centerArea = new BorderPane();
+        centerArea.setStyle("-fx-background-color: white;");
+        centerArea.setPadding(new Insets(20));
+
+        // Top bar
+        HBox topBar = createTopBar();
+        centerArea.setTop(topBar);
+
+        // Table section
+        VBox tableSection = createTableSection();
+        centerArea.setCenter(tableSection);
+
+        this.setCenter(centerArea);
+    }
+
+    private VBox createSidebar() {
+        VBox sidebar = new VBox();
+        sidebar.setPrefWidth(270);
+        sidebar.setStyle("-fx-background-color: #2c2c2c;");
+        sidebar.setPadding(new Insets(20));
+        sidebar.setSpacing(0);
+
+        Label titleLabel = new Label("Navigation");
+        titleLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px; -fx-padding: 0 0 20 0;");
+
+        Button workerNameBtn = createNavButton("Worker Name", false);
+        Button inventoryBtn = createNavButton("Inventory", false);
+        Button trendsBtn = createNavButton("Trends", false);
+        Button orderHistoryBtn = createNavButton("Order History", true);
+        Button employeesBtn = createNavButton("Employees", false);
+
+        sidebar.getChildren().addAll(titleLabel, workerNameBtn, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
+
+        return sidebar;
+    }
+
+    private Button createNavButton(String text, boolean active) {
         Button btn = new Button(text);
-        btn.setPrefWidth(220);
-        btn.setFont(new javafx.scene.text.Font(16));
+        btn.setPrefWidth(230);
+        btn.setPrefHeight(50);
+        btn.setAlignment(Pos.CENTER_LEFT);
+        btn.setPadding(new Insets(10, 10, 10, 20));
+
+        if (active) {
+            btn.setStyle("-fx-background-color: #e0e0e0; -fx-text-fill: black; " +
+                    "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;");
+        } else {
+            btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
+                    "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;");
+            btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #3c3c3c; -fx-text-fill: white; " +
+                    "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;"));
+            btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
+                    "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;"));
+        }
+
         return btn;
     }
 
-    // ===== Placeholder methods for functionality =====
-    private void handleInventoryClick() {
-        System.out.println("Inventory button clicked");
-        // TODO: Add logic to switch to Inventory view
+    private HBox createTopBar() {
+        HBox topBar = new HBox();
+        topBar.setPadding(new Insets(0, 0, 20, 0));
+        topBar.setAlignment(Pos.CENTER_LEFT);
+
+        Label titleLabel = new Label("Order History");
+        titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button logoutBtn = new Button("⎋");
+        logoutBtn.setStyle("-fx-font-size: 24px; -fx-background-color: transparent; " +
+                "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; -fx-padding: 5 15;");
+        logoutBtn.setOnAction(e -> handleLogout());
+
+        topBar.getChildren().addAll(titleLabel, spacer, logoutBtn);
+        return topBar;
     }
 
-    private void handleTrendsClick() {
-        System.out.println("Trends button clicked");
-        // TODO: Add logic to switch to Trends view
+    private VBox createTableSection() {
+        VBox tableBox = new VBox();
+        VBox.setVgrow(tableBox, Priority.ALWAYS);
+
+        table = new TableView<>();
+        table.setEditable(false);
+        table.setStyle("-fx-border-color: black; -fx-border-width: 2;");
+
+        // Columns
+        TableColumn<OrderRecord, Integer> orderNumCol = new TableColumn<>("Order #");
+        orderNumCol.setCellValueFactory(param -> param.getValue().orderNumberProperty().asObject());
+        orderNumCol.setPrefWidth(100);
+
+        TableColumn<OrderRecord, String> dateTimeCol = new TableColumn<>("Date/Time");
+        dateTimeCol.setCellValueFactory(param -> param.getValue().orderDateTimeProperty());
+        dateTimeCol.setPrefWidth(200);
+
+        TableColumn<OrderRecord, String> drinksCol = new TableColumn<>("Drinks");
+        drinksCol.setCellValueFactory(param -> param.getValue().drinksProperty());
+        drinksCol.setPrefWidth(500);
+        drinksCol.setCellFactory(tc -> {
+            TableCell<OrderRecord, String> cell = new TableCell<>() {
+                private final Label label = new Label();
+                {
+                    label.setWrapText(true);
+                    label.setPadding(new Insets(5));
+                }
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setGraphic(null);
+                    } else {
+                        label.setText(item);
+                        setGraphic(label);
+                    }
+                }
+            };
+            return cell;
+        });
+
+        TableColumn<OrderRecord, String> totalCol = new TableColumn<>("Total");
+        totalCol.setCellValueFactory(param -> param.getValue().totalFormattedProperty());
+        totalCol.setPrefWidth(120);
+
+        TableColumn<OrderRecord, Void> actionsCol = new TableColumn<>("Actions");
+        actionsCol.setPrefWidth(250);
+        actionsCol.setCellFactory(createActionsCellFactory());
+
+        table.getColumns().addAll(orderNumCol, dateTimeCol, drinksCol, totalCol, actionsCol);
+        tableBox.getChildren().add(table);
+        VBox.setVgrow(table, Priority.ALWAYS);
+        return tableBox;
     }
 
-    private void handleOrderHistoryClick() {
-        System.out.println("Order History button clicked");
-        // TODO: Refresh the order history table if needed
+    private Callback<TableColumn<OrderRecord, Void>, TableCell<OrderRecord, Void>> createActionsCellFactory() {
+        return new Callback<>() {
+            @Override
+            public TableCell<OrderRecord, Void> call(final TableColumn<OrderRecord, Void> param) {
+                return new TableCell<>() {
+                    private final Button detailsBtn = new Button("Details");
+                    private final Button reprintBtn = new Button("Reprint");
+                    private final Button deleteBtn = new Button("Delete");
+
+                    {
+                        List<Button> btns = List.of(detailsBtn, reprintBtn, deleteBtn);
+                        for (Button btn : btns) {
+                            btn.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 1; " +
+                                    "-fx-padding: 5 15; -fx-cursor: hand;");
+                        }
+
+                        deleteBtn.setOnAction(e -> {
+                            OrderRecord order = getTableView().getItems().get(getIndex());
+                            removeOrder(order);
+                        });
+                    }
+
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) setGraphic(null);
+                        else {
+                            HBox box = new HBox(10, detailsBtn, reprintBtn, deleteBtn);
+                            box.setAlignment(Pos.CENTER);
+                            setGraphic(box);
+                        }
+                    }
+                };
+            }
+        };
     }
 
-    private void handleEmployeesClick() {
-        System.out.println("Employees button clicked");
-        // TODO: Switch to Employees view
+    private void loadDataFromDatabase() {
+        if (dbService == null) {
+            showError("Database Error", "Database service not initialized");
+            return;
+        }
+
+        data = FXCollections.observableArrayList();
+
+        try (Connection conn = dbService.getConnection()) {
+            // Load all orders info
+            Map<Integer, OrderInfo> orderInfoMap = new HashMap<>();
+            String orderQuery = "SELECT order_number, order_date, order_time, total_price, employee_id FROM orders";
+            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(orderQuery)) {
+                while (rs.next()) {
+                    int orderNum = rs.getInt("order_number");
+                    String datetime = rs.getString("order_date") + " " + rs.getString("order_time");
+                    double total = rs.getDouble("total_price");
+                    orderInfoMap.put(orderNum, new OrderInfo(datetime, total));
+                }
+            }
+
+            // Load menu items
+            Map<Integer, String> itemNameMap = new HashMap<>();
+            String itemQuery = "SELECT item_id, item_name FROM menu_items";
+            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(itemQuery)) {
+                while (rs.next()) {
+                    itemNameMap.put(rs.getInt("item_id"), rs.getString("item_name"));
+                }
+            }
+
+            // Load order summary
+            String summaryQuery = "SELECT order_key, order_number, combo_id, item_id FROM order_summary ORDER BY order_number, combo_id, order_key";
+            Map<Integer, Map<Integer, List<Integer>>> orderCombos = new LinkedHashMap<>();
+
+            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(summaryQuery)) {
+                while (rs.next()) {
+                    int orderNum = rs.getInt("order_number");
+                    int comboId = rs.getInt("combo_id");
+                    int itemId = rs.getInt("item_id");
+
+                    orderCombos.computeIfAbsent(orderNum, k -> new LinkedHashMap<>())
+                            .computeIfAbsent(comboId, k -> new ArrayList<>())
+                            .add(itemId);
+                }
+            }
+
+            // Build rows
+            for (Map.Entry<Integer, Map<Integer, List<Integer>>> entry : orderCombos.entrySet()) {
+                int orderNum = entry.getKey();
+                StringBuilder drinksText = new StringBuilder();
+
+                int drinkIndex = 1;
+                for (Map.Entry<Integer, List<Integer>> combo : entry.getValue().entrySet()) {
+                    List<String> itemNames = new ArrayList<>();
+                    for (Integer itemId : combo.getValue()) {
+                        itemNames.add(itemNameMap.getOrDefault(itemId, "Unknown Item"));
+                    }
+                    drinksText.append("Drink ").append(drinkIndex).append(": ")
+                            .append(String.join(" + ", itemNames))
+                            .append("\n");
+                    drinkIndex++;
+                }
+
+                OrderInfo info = orderInfoMap.getOrDefault(orderNum, new OrderInfo("N/A", 0.0));
+                data.add(new OrderRecord(orderNum, info.dateTime, drinksText.toString().trim(), info.totalPrice));
+            }
+
+            table.setItems(data);
+
+        } catch (SQLException e) {
+            showError("SQL Error", e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private void handleExitClick() {
-        System.out.println("Exit clicked");
-        // TODO: Close window or navigate back
+    private void removeOrder(OrderRecord order) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Delete");
+        alert.setHeaderText("Delete order #" + order.getOrderNumber() + "?");
+        alert.setContentText("This action cannot be undone.");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try (Connection conn = dbService.getConnection()) {
+                    PreparedStatement pstmt = conn.prepareStatement("DELETE FROM order_summary WHERE order_number = ?");
+                    pstmt.setInt(1, order.getOrderNumber());
+                    pstmt.executeUpdate();
+
+                    pstmt = conn.prepareStatement("DELETE FROM orders WHERE order_number = ?");
+                    pstmt.setInt(1, order.getOrderNumber());
+                    pstmt.executeUpdate();
+
+                    data.remove(order);
+                } catch (SQLException e) {
+                    showError("Delete Error", e.getMessage());
+                }
+            }
+        });
+    }
+
+    private void handleLogout() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Logout");
+        alert.setHeaderText("Are you sure you want to logout?");
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                System.out.println("Logging out...");
+            }
+        });
+    }
+
+    private void showError(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
+
+    // Helper classes
+    private static class OrderInfo {
+        String dateTime;
+        double totalPrice;
+        public OrderInfo(String dateTime, double totalPrice) {
+            this.dateTime = dateTime;
+            this.totalPrice = totalPrice;
+        }
+    }
+
+    public static class OrderRecord {
+        private final javafx.beans.property.IntegerProperty orderNumber;
+        private final javafx.beans.property.StringProperty orderDateTime;
+        private final javafx.beans.property.StringProperty drinks;
+        private final javafx.beans.property.DoubleProperty total;
+        private final javafx.beans.property.StringProperty totalFormatted;
+
+        public OrderRecord(int orderNumber, String dateTime, String drinks, double total) {
+            this.orderNumber = new javafx.beans.property.SimpleIntegerProperty(orderNumber);
+            this.orderDateTime = new javafx.beans.property.SimpleStringProperty(dateTime);
+            this.drinks = new javafx.beans.property.SimpleStringProperty(drinks);
+            this.total = new javafx.beans.property.SimpleDoubleProperty(total);
+            NumberFormat currency = NumberFormat.getCurrencyInstance(Locale.US);
+            this.totalFormatted = new javafx.beans.property.SimpleStringProperty(currency.format(total));
+        }
+
+        public int getOrderNumber() { return orderNumber.get(); }
+        public javafx.beans.property.IntegerProperty orderNumberProperty() { return orderNumber; }
+
+        public String getOrderDateTime() { return orderDateTime.get(); }
+        public javafx.beans.property.StringProperty orderDateTimeProperty() { return orderDateTime; }
+
+        public String getDrinks() { return drinks.get(); }
+        public javafx.beans.property.StringProperty drinksProperty() { return drinks; }
+
+        public double getTotal() { return total.get(); }
+        public javafx.beans.property.DoubleProperty totalProperty() { return total; }
+
+        public String getTotalFormatted() { return totalFormatted.get(); }
+        public javafx.beans.property.StringProperty totalFormattedProperty() { return totalFormatted; }
     }
 }
