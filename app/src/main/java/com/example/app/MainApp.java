@@ -44,7 +44,8 @@ public class MainApp extends Application {
         orderHistoryTab.setContent(OrderHistoryController);
 
         Tab trendsTab = new Tab("Order Trends");
-        trendsTab.setContent(new TrendsController());
+        TrendsController trendsController = new TrendsController();
+        trendsTab.setContent(trendsController);
 
         // === Add all tabs to the TabPane ===
         tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab);
@@ -52,6 +53,8 @@ public class MainApp extends Application {
         employeesController.setTabNavigator(tabPane);
         inventoryController.setTabNavigator(tabPane);
         OrderHistoryController.setTabNavigator(tabPane);
+        trendsController.setTabNavigator(tabPane);
+        
 
         // === Create Scene and show Stage ===
         Scene scene = new Scene(tabPane, 1000, 600);

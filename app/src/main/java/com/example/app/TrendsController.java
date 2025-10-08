@@ -10,21 +10,20 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 
 public class TrendsController extends BorderPane {
+    private TabPane tabNavigator;
+
 
     // ===== Left sidebar buttons =====
-    public Button btnInventory;
-    public Button btnTrends;
-    public Button btnOrderHistory;
-
-    // ===== Center controls =====
     public DatePicker startDatePicker;
     public DatePicker endDatePicker;
 
+    // ===== Metrics =====
     public Label lblTotalRevenue;
     public Label lblTotalOrders;
     public Label lblAvgOrderValue;
     public Label lblUpsellRate;
 
+    // ===== Charts =====
     public LineChart<String, Number> revenueChart;
     public BarChart<String, Number> categoryChart;
 
@@ -35,57 +34,44 @@ public class TrendsController extends BorderPane {
     private void initialize() {
         this.setPrefSize(900, 600);
 
-        // ===== Left AnchorPane (Sidebar) =====
-        AnchorPane leftPane = new AnchorPane();
-        leftPane.setPrefWidth(248);
+        // ===== Left Sidebar (match InventoryController) =====
+        this.setLeft(createSidebar());
 
-        Label workerLabel = new Label("Worker Name");
-        workerLabel.setLayoutX(14);
-        workerLabel.setLayoutY(14);
-        workerLabel.setFont(new javafx.scene.text.Font(18));
-        workerLabel.setTextFill(javafx.scene.paint.Color.rgb(159, 159, 159));
-
-        Separator separator = new Separator();
-        separator.setLayoutX(14);
-        separator.setLayoutY(50);
-        separator.setPrefWidth(220);
-
-        VBox buttonBox = new VBox(10);
-        buttonBox.setLayoutX(14);
-        buttonBox.setLayoutY(70);
-        buttonBox.setPrefWidth(220);
-
-        btnInventory = createSideButton("Inventory");
-        btnTrends = createSideButton("Trends");
-        btnOrderHistory = createSideButton("Order History");
-
-        buttonBox.getChildren().addAll(btnInventory, btnTrends, btnOrderHistory);
-        leftPane.getChildren().addAll(workerLabel, separator, buttonBox);
-
-        // ===== Center VBox (Content) =====
-        VBox centerBox = new VBox(20);
+        // ===== Center VBox =====
+        VBox centerBox = new VBox();
+        centerBox.setSpacing(20);
         centerBox.setPadding(new Insets(20));
+        centerBox.setStyle("-fx-background-color: white;");
 
-        Label titleLabel = new Label("Ordering Trends");
-        titleLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+        // ===== Title =====
+        Label titleLabel = new Label("Order Trends");
+        titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
 
-        // Date pickers
-        HBox dateBox = new HBox(20);
+        // ===== Date Range HBox =====
+        HBox dateBox = new HBox(10);
         dateBox.setAlignment(Pos.CENTER_LEFT);
-        Label dateLabel = new Label("date range");
+
+        Label startLabel = new Label("Start Date:");
         startDatePicker = new DatePicker();
-        startDatePicker.setPromptText("Start Date");
+
+        Label endLabel = new Label("End Date:");
         endDatePicker = new DatePicker();
-        endDatePicker.setPromptText("End Date");
-        dateBox.getChildren().addAll(dateLabel, startDatePicker, endDatePicker);
 
-        // Metrics boxes
-        HBox metricsBox = new HBox(20);
+        Button refreshBtn = new Button("Refresh");
+        refreshBtn.setOnAction(e -> {
+            // TODO: refresh logic
+        });
 
-        VBox totalRevenueBox = createMetricBox("total revenue");
+        dateBox.getChildren().addAll(startLabel, startDatePicker, endLabel, endDatePicker, refreshBtn);
+
+        // ===== Metrics HBox =====
+        HBox metricsBox = new HBox(12);
+        metricsBox.setAlignment(Pos.CENTER_LEFT);
+
+        VBox totalRevenueBox = createMetricBox("Total Revenue");
         lblTotalRevenue = (Label) totalRevenueBox.getChildren().get(0);
 
-        VBox totalOrdersBox = createMetricBox("total orders");
+        VBox totalOrdersBox = createMetricBox("Total Orders");
         lblTotalOrders = (Label) totalOrdersBox.getChildren().get(0);
 
         VBox avgOrderBox = createMetricBox("Avg Order Value");
@@ -96,8 +82,9 @@ public class TrendsController extends BorderPane {
 
         metricsBox.getChildren().addAll(totalRevenueBox, totalOrdersBox, avgOrderBox, upsellBox);
 
-        // Charts
+        // ===== Charts
         HBox chartsBox = new HBox(20);
+        chartsBox.setAlignment(Pos.CENTER_LEFT);
 
         revenueChart = new LineChart<>(new CategoryAxis(), new NumberAxis());
         revenueChart.setPrefSize(500, 300);
@@ -113,60 +100,97 @@ public class TrendsController extends BorderPane {
         HBox topBox = new HBox();
         topBox.setAlignment(Pos.CENTER_RIGHT);
         topBox.setPadding(new Insets(10));
+        topBox.setStyle("-fx-background-color: #f5f5f5;");
 
-        Label exitLabel = new Label("Esc");
-        topBox.getChildren().add(exitLabel);
+        Button exportBtn = new Button("Export");
+        exportBtn.setOnAction(e -> {
+            // TODO: Export logic
+        });
 
-        // ===== Assemble BorderPane =====
-        this.setLeft(leftPane);
-        this.setCenter(centerBox);
+        Button backBtn = new Button("Back");
+        backBtn.setOnAction(e -> {
+            // TODO: Close window or navigate back
+        });
+
+        topBox.getChildren().addAll(exportBtn, backBtn);
+
         this.setTop(topBox);
-
-        // ===== Event handlers & placeholders =====
-        btnInventory.setOnAction(e -> handleInventoryClick());
-        btnTrends.setOnAction(e -> handleTrendsClick());
-        btnOrderHistory.setOnAction(e -> handleOrderHistoryClick());
-        exitLabel.setOnMouseClicked(e -> handleExitClick());
-
-        // TODO: Populate charts and metrics when date range changes
-        // TODO: Add logic for filtering trends by startDatePicker and endDatePicker
+        this.setCenter(centerBox);
     }
 
-    private Button createSideButton(String text) {
-        Button btn = new Button(text);
-        btn.setPrefWidth(220);
-        btn.setFont(new javafx.scene.text.Font(16));
-        return btn;
-    }
-
-    private VBox createMetricBox(String labelText) {
-        VBox box = new VBox(10);
-        box.setAlignment(Pos.CENTER);
-        box.setPrefSize(230, 150);
-        Label valueLabel = new Label("0");
-        Label textLabel = new Label(labelText);
-        box.getChildren().addAll(valueLabel, textLabel);
+    private VBox createMetricBox(String caption) {
+        VBox box = new VBox(4);
+        box.setPadding(new Insets(12));
+        box.setStyle("-fx-background-color: #f6f6f6; -fx-border-color: #e5e5e5; -fx-border-radius: 8; -fx-background-radius: 8;");
+        Label value = new Label("--");
+        value.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        Label cap = new Label(caption);
+        cap.setStyle("-fx-text-fill: #777;");
+        box.getChildren().addAll(value, cap);
         return box;
     }
 
-    // ===== Placeholder methods for functionality =====
-    private void handleInventoryClick() {
-        System.out.println("Inventory button clicked");
-        // TODO: Add logic to switch to Inventory view
+    // Sidebar 
+
+    public void setTabNavigator(TabPane tabPane) {
+        this.tabNavigator = tabPane;
     }
 
-    private void handleTrendsClick() {
-        System.out.println("Trends button clicked");
-        // TODO: Add logic to refresh trends
+    private void go(String tabTitle) {
+        if (tabNavigator == null) return;
+        tabNavigator.getTabs().stream()
+                .filter(t -> tabTitle.equals(t.getText()))
+                .findFirst()
+                .ifPresent(t -> tabNavigator.getSelectionModel().select(t));
     }
 
-    private void handleOrderHistoryClick() {
-        System.out.println("Order History button clicked");
-        // TODO: Add logic to switch to Order History view
+    private Button createNavButton(String text, boolean active) {
+        Button btn = new Button(text);
+        btn.setPrefWidth(230);
+        btn.setPrefHeight(50);
+        btn.setAlignment(Pos.CENTER_LEFT);
+        btn.setPadding(new Insets(10, 10, 10, 20));
+
+        if (active) {
+            btn.setStyle("-fx-background-color: #e0e0e0; -fx-text-fill: black; " +
+                        "-fx-font-size: 16px; -fx-border-width: 0; " +
+                        "-fx-background-radius: 0; -fx-cursor: hand;");
+        } else {
+            btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
+                        "-fx-font-size: 16px; -fx-border-width: 0; " +
+                        "-fx-background-radius: 0; -fx-cursor: hand;");
+            btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #3c3c3c; -fx-text-fill: white; " +
+                        "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;"));
+            btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; " +
+                        "-fx-font-size: 16px; -fx-border-width: 0; -fx-background-radius: 0; -fx-cursor: hand;"));
+        }
+        return btn;
     }
 
-    private void handleExitClick() {
-        System.out.println("Exit clicked");
-        // TODO: Close window or navigate back
+    private VBox createSidebar() {
+        VBox sidebar = new VBox();
+        sidebar.setPrefWidth(270);
+        sidebar.setStyle("-fx-background-color: #2c2c2c;");
+        sidebar.setPadding(new Insets(20));
+        sidebar.setSpacing(0);
+
+        // Title
+        Label titleLabel = new Label("Trends");
+        titleLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px; -fx-padding: 0 0 20 0;");
+
+        // Navigation buttons (exact tab titles must match MainApp’s tabs)
+        Button workerNameBtn = createNavButton("Worker Name", false);
+        Button inventoryBtn = createNavButton("Inventory", false);
+        inventoryBtn.setOnAction(e -> go("Inventory"));
+        Button trendsBtn = createNavButton("Trends", true);
+        trendsBtn.setOnAction(e -> go("Order Trends"));
+        Button orderHistoryBtn = createNavButton("Order History", false);
+        orderHistoryBtn.setOnAction(e -> go("Order History"));
+        Button employeesBtn = createNavButton("Employees", false);
+        employeesBtn.setOnAction(e -> go("Employees"));
+
+        sidebar.getChildren().addAll(titleLabel, workerNameBtn, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
+        
+        return sidebar;
     }
 }
