@@ -56,12 +56,20 @@ public class HomeController extends VBox {
     // === NEW: Observable list for TableView items ===
     private ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
 
+
+
     // Database connection info
     DatabaseService db;
 
     public HomeController() {
         initialize();
     }
+
+    public void setEmployeeName(String name) {
+    if (employeeNameField != null && name != null && !name.isBlank()) {
+        employeeNameField.setText(name);
+    }
+}
 
     private void initialize() {
         this.setPrefSize(900, 600);
@@ -105,6 +113,7 @@ public class HomeController extends VBox {
         employeeNameField.setLayoutY(22);
         employeeNameField.setPrefSize(151, 26);
         employeeNameField.setPromptText("Employee Name");
+        employeeNameField.setEditable(false);
 
         managerModeButton = new Button("\u2630"); // Unicode ≡
         managerModeButton.setLayoutX(12);

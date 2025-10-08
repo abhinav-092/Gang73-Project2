@@ -19,6 +19,7 @@ public class EnterPinController extends BorderPane {
 
     // Callback to tell MainApp whether the user is a manager
     private Consumer<Boolean> accessApplier;
+    private java.util.function.Consumer<String> nameApplier;
 
     public EnterPinController() {
         initialize();
@@ -34,6 +35,10 @@ public class EnterPinController extends BorderPane {
 
     public void setAccessApplier(Consumer<Boolean> accessApplier) {
         this.accessApplier = accessApplier;
+    }
+
+    public void setNameApplier(java.util.function.Consumer<String> nameApplier) {
+        this.nameApplier = nameApplier;
     }
 
     private void initialize() {
@@ -115,7 +120,9 @@ public class EnterPinController extends BorderPane {
         }
 
         // Get is_manager (0/1) for this employee
-        String sql = "SELECT is_manager FROM employees WHERE Employee_ID = ?";
+        String sql =
+            "SELECT is_manager, employee_name AS emp_name " +
+            "FROM employees WHERE employee_id = ?";
 
         try {
             if (!dbService.isConnected()){
@@ -126,9 +133,12 @@ public class EnterPinController extends BorderPane {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     boolean isManager = rs.getBoolean("is_manager");
+                    String employeeName = rs.getString("emp_name");
                     statusLabel.setText("Login successful!");
                     pinField.clear();
 
+                    // send name first
+                    if (nameApplier != null)   nameApplier.accept(employeeName);
                     // Tell MainApp to enable/disable tabs based on role
                     if (accessApplier != null) accessApplier.accept(isManager);
 
