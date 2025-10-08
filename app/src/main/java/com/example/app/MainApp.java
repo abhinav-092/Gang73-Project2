@@ -18,13 +18,13 @@ public class MainApp extends Application {
 
         // === Create a single DatabaseService instance and connect ===
         DatabaseService dbService = new DatabaseService();
-        dbService.connect();  // Make sure your DB details are correct
+        dbService.connect(); // Make sure your DB details are correct
 
         Tab homeTab = new Tab("Home");
         homeTab.setContent(new HomeController());
 
         Tab empTab = new Tab("Employees");
-        empTab.setContent(new EmployeesController());
+        empTab.setContent(new EmployeesController(dbService));
 
         Tab pinTab = new Tab("Enter Pin");
         pinTab.setContent(new EnterPinController());
