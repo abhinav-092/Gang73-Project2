@@ -8,7 +8,7 @@ public class DatabaseService {
     public void connect() throws SQLException {
         // Example: adjust your connection details
         String url = "jdbc:postgresql://csce-315-db.engr.tamu.edu/gang_73_db";
-        String user = "gagn_73";
+        String user = "gang_73";
         String password = "taeleourgoat";
         connection = DriverManager.getConnection(url, user, password);
         System.out.println("Connected to database");
