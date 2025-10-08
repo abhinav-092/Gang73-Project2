@@ -25,9 +25,10 @@ public class MainApp extends Application {
         homeController.setDatabaseService(dbService);
         homeTab.setContent(homeController);
 
-
         Tab empTab = new Tab("Employees");
-        empTab.setContent(new EmployeesController());
+        EmployeesController employeesController = new EmployeesController();
+        employeesController.setDatabaseService(dbService);  // This must be called!
+        empTab.setContent(employeesController);
 
         Tab pinTab = new Tab("Enter Pin");
         pinTab.setContent(new EnterPinController());
