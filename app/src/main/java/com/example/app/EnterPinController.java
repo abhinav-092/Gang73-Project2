@@ -109,7 +109,6 @@ public class EnterPinController extends BorderPane {
             statusLabel.setText("Employee ID must be numbers only.");
             return;
         }
-
         if (dbService == null) {
             statusLabel.setText("Database not connected!");
             return;
@@ -118,7 +117,12 @@ public class EnterPinController extends BorderPane {
         // Get is_manager (0/1) for this employee
         String sql = "SELECT is_manager FROM employees WHERE Employee_ID = ?";
 
-        try (PreparedStatement stmt = dbService.getConnection().prepareStatement(sql)) {
+        try {
+            if (!dbService.isConnected()){
+                dbService.connect();
+            }
+            PreparedStatement stmt = dbService.getConnection().prepareStatement(sql);
+            System.out.println(stmt);
             stmt.setInt(1, empId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
