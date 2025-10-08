@@ -287,7 +287,9 @@ public class OrderHistoryController extends BorderPane {
                 data.add(new OrderRecord(orderNum, info.dateTime, drinksText.toString().trim(), info.totalPrice));
             }
 
+            FXCollections.reverse(data);
             table.setItems(data);
+
 
         } catch (SQLException e) {
             showError("SQL Error", e.getMessage());
