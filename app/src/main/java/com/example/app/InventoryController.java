@@ -19,6 +19,11 @@ public class InventoryController extends BorderPane {
     private TableView<InventoryItem> table;
     private ObservableList<InventoryItem> data;
     private DatabaseService dbService;
+    private TabPane tabNavigator;
+
+    public void setTabNavigator(TabPane tabPane) {
+        this.tabNavigator = tabPane;
+    }
 
     public InventoryController() {
         setupUI();
@@ -27,6 +32,14 @@ public class InventoryController extends BorderPane {
     public void setDatabaseService(DatabaseService dbService) {
         this.dbService = dbService;
         loadDataFromDatabase();
+    }
+
+    private void go(String tabTitle) {
+        if (tabNavigator == null) return;
+        tabNavigator.getTabs().stream()
+                .filter(t -> tabTitle.equals(t.getText()))
+                .findFirst()
+                .ifPresent(t -> tabNavigator.getSelectionModel().select(t));
     }
     
     private void setupUI() {
@@ -64,10 +77,14 @@ public class InventoryController extends BorderPane {
         // Navigation buttons
         Button workerNameBtn = createNavButton("Worker Name", false);
         Button inventoryBtn = createNavButton("Inventory", true);
+        inventoryBtn.setOnAction(e -> go("Inventory"));
         Button trendsBtn = createNavButton("Trends", false);
+        trendsBtn.setOnAction(e -> go("Order Trends"));
         Button orderHistoryBtn = createNavButton("Order History", false);
+        orderHistoryBtn.setOnAction(e -> go("Order History"));
         Button employeesBtn = createNavButton("Employees", false);
-        
+        employeesBtn.setOnAction(e -> go("Employees"));
+
         sidebar.getChildren().addAll(titleLabel, workerNameBtn, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
         
         return sidebar;

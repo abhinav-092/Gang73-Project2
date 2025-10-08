@@ -41,10 +41,13 @@ public class MainApp extends Application {
         inventoryTab.setContent(inventoryController);
 
         Tab orderHistoryTab = new Tab("Order History");
-        orderHistoryTab.setContent(new OrderHistoryController());
+        OrderHistoryController OrderHistoryController = new OrderHistoryController();
+        OrderHistoryController.setDatabaseService(dbService); // This must be called!
+        orderHistoryTab.setContent(OrderHistoryController);
 
         Tab trendsTab = new Tab("Order Trends");
-        trendsTab.setContent(new TrendsController());
+        TrendsController trendsController = new TrendsController();
+        trendsTab.setContent(trendsController);
 
         // Add tabs to the pane (order matters: Home first works with selectFirst())
         tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab);
@@ -83,6 +86,13 @@ public class MainApp extends Application {
         });
 
         // Stage/Scene
+        employeesController.setTabNavigator(tabPane);
+        inventoryController.setTabNavigator(tabPane);
+        OrderHistoryController.setTabNavigator(tabPane);
+        trendsController.setTabNavigator(tabPane);
+        
+
+        // === Create Scene and show Stage ===
         Scene scene = new Scene(tabPane, 1000, 600);
         stage.setScene(scene);
         stage.setTitle("POS System");

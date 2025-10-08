@@ -28,6 +28,8 @@ Item_ID,Name,Base_price,Category
 27,Extra Sugar,0,customization
 28,Low Sugar,0,customization
 29,No Sugar,0,customization
-30,Oat Milk Substitute,0,customization
-31,Almond Milk Substitute,0,customization
+30,Oat Milk,0,customization
+31,Almond Milk,0,customization
 32,Whole Milk,0,customization
+33,Regular Ice,0,customization
+34,Regular Sugar,0,customization
