@@ -10,5 +10,12 @@ CREATE TABLE orders(
 );
 
 \copy orders FROM 'Csv_files/orders.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+
+SELECT setval(
+    pg_get_serial_sequence('orders', 'order_number'),
+    COALESCE((SELECT MAX(order_number) + 1 FROM orders), 1),
+    false
+);
+
 --Display changes
 SELECT * FROM orders;

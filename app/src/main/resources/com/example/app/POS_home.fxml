@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
+  All rights reserved. Use is subject to license terms.
+
+  This file is available and licensed under the following license:
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  - Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  - Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the distribution.
+  - Neither the name of Oracle Corporation nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<?import com.gluonhq.charm.glisten.control.ToggleButtonGroup?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<VBox fx:controller="com.example.app.HomeController" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+  <children>
+    <SplitPane dividerPositions="0.27561247216035634" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+      <items>
+        <AnchorPane>
+          <children>
+                  <TableView layoutX="12.0" layoutY="108.0" prefHeight="346.0" prefWidth="215.0">
+                    <columns>
+                      <TableColumn prefWidth="105.8174409866333" text="item" />
+                      <TableColumn prefWidth="109.18257904052734" text="price" />
+                    </columns>
+                  </TableView>
+                  <Label layoutX="10.0" layoutY="62.0" text="Order #">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField layoutX="71.0" layoutY="61.0" prefHeight="26.0" prefWidth="34.0" />
+                  <TextField layoutX="78.0" layoutY="22.0" prefHeight="26.0" prefWidth="151.0" promptText="Employee Name" />
+                  <Button layoutX="12.0" layoutY="15.0" minWidth="36.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="36.0">
+                     <graphic>
+                        <Icon fx:id="managerModeButton" content="FORMAT_ALIGN_LEFT" prefHeight="26.0" prefWidth="17.0" />
+                     </graphic>
+                  </Button>
+          </children>
+        </AnchorPane>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <TabPane prefHeight="550.5" prefWidth="647.0" side="RIGHT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <tabs>
+                      <Tab text="Milk Tea">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                    <GridPane layoutX="17.0" layoutY="14.0" prefHeight="483.0" prefWidth="551.0">
+                                       <columnConstraints>
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                          <Button fx:id="classicMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Classic" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="taroMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Taro" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="honeydewMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Honeydew" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="thaiMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Thai" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="brownSugarMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Brown Sugar" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="matchaMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Matcha" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="coffeeMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Coffee" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="strawberryMTButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Strawberry" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                              </AnchorPane>
+                           </content>
+                        </Tab>
+                      <Tab text="Fruit Tea">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                    <GridPane alignment="CENTER" layoutX="17.0" layoutY="14.0" prefHeight="322.0" prefWidth="551.0">
+                                       <columnConstraints>
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                          <Button fx:id="passionfruitFTButton" alignment="CENTER" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Passionfruit Green" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="16.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="mangoFTButton" alignment="CENTER" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Mango Green" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="16.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="lycheeFTButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Lychee Green" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="16.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="straweberryFTButton" alignment="CENTER" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Strawberry Green" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="16.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="wintermelonFTButton" alignment="CENTER" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Wintermelon" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="16.0" />
+                                             </font>
+                                          </Button>
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                              </AnchorPane>
+                           </content></Tab>
+                        <Tab text="Blended">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                    <GridPane layoutX="17.0" layoutY="14.0" prefHeight="322.0" prefWidth="551.0">
+                                       <columnConstraints>
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                          <Button fx:id="taroBLButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Taro" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="mangoBLButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Mango" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="strawberryBLButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Strawberry" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="matchaBLButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Matcha" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="coffeeBLButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Coffee" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                          <Button fx:id="honeydewBLButton" mnemonicParsing="false" prefHeight="100.0" prefWidth="150.0" style="-fx-border-color: 000000; -fx-border-style: solid;" text="Honeydew" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Button>
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                              </AnchorPane>
+                           </content></Tab>
+                        <Tab text="Customize">
+                           <content>
+                              <AnchorPane>
+                                 <children>
+                                    <AnchorPane layoutY="16.0" prefHeight="185.0" prefWidth="584.0" AnchorPane.bottomAnchor="377.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="16.0">
+                                       <children>
+                                          <Label layoutX="25.0" layoutY="12.0" prefHeight="32.0" prefWidth="68.0" text="Ice Level">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Label>
+                                          <ToggleButtonGroup layoutX="45.0" layoutY="55.0" prefHeight="111.0" prefWidth="502.0" selectionType="SINGLE">
+                                              <toggles>
+                                                  <ToggleButton fx:id="iceToggleNone" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="111.0" prefWidth="130.0" text="None" textOverrun="CENTER_ELLIPSIS">
+                                                   <font>
+                                                      <Font size="18.0" />
+                                                   </font>
+                                                  </ToggleButton>
+                                                  <ToggleButton fx:id="iceToggleLess" prefHeight="77.0" prefWidth="130.0" text="Less" />
+                                                <ToggleButton fx:id="iceToggleRegular" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="111.0" prefWidth="130.0" selected="true" text="Regular" />
+                                                  <ToggleButton fx:id="iceToggleExtra" prefWidth="130.0" text="Extra" />
+                                              </toggles>
+                                          </ToggleButtonGroup>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane layoutY="200.0" prefHeight="188.0" prefWidth="584.0" AnchorPane.bottomAnchor="190.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="200.0">
+                                       <children>
+                                          <Label layoutX="25.0" layoutY="12.0" prefHeight="32.0" prefWidth="152.0" text="Sweetness Level">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Label>
+                                          <ToggleButtonGroup layoutX="45.0" layoutY="55.0" prefHeight="111.0" prefWidth="502.0" selectionType="SINGLE">
+                                             <toggles>
+                                                <ToggleButton fx:id="sweetToggleNone" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="111.0" prefWidth="130.0" text="None" textOverrun="CENTER_ELLIPSIS">
+                                                   <font>
+                                                      <Font size="18.0" />
+                                                   </font>
+                                                </ToggleButton>
+                                                <ToggleButton fx:id="sweetToggleLess" prefHeight="77.0" prefWidth="130.0" text="Less" />
+                                                <ToggleButton fx:id="sweetToggleRegular" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="111.0" prefWidth="130.0" selected="true" text="Regular" />
+                                                <ToggleButton fx:id="sweetToggleExtra" prefWidth="130.0" text="Extra" />
+                                             </toggles>
+                                          </ToggleButtonGroup>
+                                       </children>
+                                    </AnchorPane>
+                                    <AnchorPane layoutX="-275.0" layoutY="386.0" prefHeight="192.0" prefWidth="584.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="386.0">
+                                       <children>
+                                          <Label layoutX="25.0" layoutY="12.0" prefHeight="32.0" prefWidth="84.0" text="Milk Type">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Label>
+                                          <ToggleButtonGroup layoutX="97.0" layoutY="55.0" prefHeight="111.0" prefWidth="390.0" selectionType="SINGLE">
+                                             <toggles>
+                                                <ToggleButton fx:id="wholeMilkToggle" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="111.0" prefWidth="130.0" selected="true" text="Whole" />
+                                                <ToggleButton fx:id="oatMilkToggle" prefWidth="130.0" text="Oat" />
+                                                <ToggleButton fx:id="almondMilkToggle" prefHeight="77.0" prefWidth="130.0" text="Almond" />
+                                             </toggles>
+                                          </ToggleButtonGroup>
+                                       </children>
+                                    </AnchorPane>
+                                 </children>
+                              </AnchorPane>
+                           </content></Tab>
+                    </tabs>
+                  </TabPane>
+               </children>
+            </AnchorPane>
+      </items>
+    </SplitPane>
+    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+      <children>
+        <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
+        <Label maxWidth="-1.0" text="time" HBox.hgrow="NEVER">
+               <font>
+            <Font size="11.0" fx:id="x3" />
+               </font>
+               <textFill>
+            <Color red="0.625" green="0.625" blue="0.625" fx:id="x4" />
+               </textFill></Label>
+      </children>
+      <padding>
+        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+      </padding>
+    </HBox>
+  </children>
+</VBox>
