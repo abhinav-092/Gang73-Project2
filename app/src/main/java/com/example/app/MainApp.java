@@ -91,6 +91,10 @@ public class MainApp extends Application {
             tabPane.getSelectionModel().select(homeTab);
         });
 
+        pinController.setNameApplier(name -> {
+            homeController.setEmployeeName(name);
+        });
+
         // Stage/Scene
         employeesController.setTabNavigator(tabPane);
         inventoryController.setTabNavigator(tabPane);
