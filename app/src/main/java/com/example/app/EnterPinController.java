@@ -3,10 +3,11 @@ package com.example.app;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.control.TabPane;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.Consumer;
 
 public class EnterPinController extends BorderPane {
 
@@ -15,6 +16,9 @@ public class EnterPinController extends BorderPane {
 
     private DatabaseService dbService;
     private TabPane tabPane;
+
+    // Callback to tell MainApp whether the user is a manager
+    private Consumer<Boolean> accessApplier;
 
     public EnterPinController() {
         initialize();
@@ -26,6 +30,10 @@ public class EnterPinController extends BorderPane {
 
     public void setTabPane(TabPane tabPane) {
         this.tabPane = tabPane;
+    }
+
+    public void setAccessApplier(Consumer<Boolean> accessApplier) {
+        this.accessApplier = accessApplier;
     }
 
     private void initialize() {
@@ -89,16 +97,14 @@ public class EnterPinController extends BorderPane {
 
     private void handleSubmit() {
         String raw = pinField.getText() == null ? "" : pinField.getText().trim();
-
         if (raw.isEmpty()) {
             statusLabel.setText("Please enter an Employee ID!");
             return;
         }
 
-        // Must be numeric if Employee_ID is INT
         final int empId;
         try {
-            empId = Integer.parseInt(raw);
+            empId = Integer.parseInt(raw); // Employee_ID is INT
         } catch (NumberFormatException nfe) {
             statusLabel.setText("Employee ID must be numbers only.");
             return;
@@ -109,17 +115,22 @@ public class EnterPinController extends BorderPane {
             return;
         }
 
-        String sql = "SELECT 1 FROM employees WHERE Employee_ID = ?";
+        // Get is_manager (0/1) for this employee
+        String sql = "SELECT is_manager FROM employees WHERE Employee_ID = ?";
 
         try (PreparedStatement stmt = dbService.getConnection().prepareStatement(sql)) {
-            stmt.setInt(1, empId);                    // <-- setInt for INT column
+            stmt.setInt(1, empId);
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {                      // found a matching employee
+                if (rs.next()) {
+                    boolean isManager = rs.getBoolean("is_manager");
                     statusLabel.setText("Login successful!");
                     pinField.clear();
-                    if (tabPane != null) {
-                        tabPane.getSelectionModel().selectFirst(); // open Home tab
-                    }
+
+                    // Tell MainApp to enable/disable tabs based on role
+                    if (accessApplier != null) accessApplier.accept(isManager);
+
+                    // Go to Home (MainApp has already unlocked appropriate tabs)
+                    if (tabPane != null) tabPane.getSelectionModel().selectFirst();
                 } else {
                     statusLabel.setText("Invalid Employee ID!");
                 }
