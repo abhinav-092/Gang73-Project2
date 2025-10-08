@@ -64,31 +64,46 @@ public class InventoryController extends BorderPane {
     }
     
     private VBox createSidebar() {
-        VBox sidebar = new VBox();
-        sidebar.setPrefWidth(270);
-        sidebar.setStyle("-fx-background-color: #2c2c2c;");
-        sidebar.setPadding(new Insets(20));
-        sidebar.setSpacing(0);
-        
-        // Title
-        Label titleLabel = new Label("Inventory");
-        titleLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px; -fx-padding: 0 0 20 0;");
-        
-        // Navigation buttons
-        Button workerNameBtn = createNavButton("Worker Name", false);
-        Button inventoryBtn = createNavButton("Inventory", true);
-        inventoryBtn.setOnAction(e -> go("Inventory"));
-        Button trendsBtn = createNavButton("Trends", false);
-        trendsBtn.setOnAction(e -> go("Order Trends"));
-        Button orderHistoryBtn = createNavButton("Order History", false);
-        orderHistoryBtn.setOnAction(e -> go("Order History"));
-        Button employeesBtn = createNavButton("Employees", false);
-        employeesBtn.setOnAction(e -> go("Employees"));
+    VBox sidebar = new VBox();
+    sidebar.setPrefWidth(270);
+    sidebar.setStyle("-fx-background-color: #2c2c2c;");
+    sidebar.setPadding(new Insets(20));
+    sidebar.setSpacing(0);
 
-        sidebar.getChildren().addAll(titleLabel, workerNameBtn, inventoryBtn, trendsBtn, orderHistoryBtn, employeesBtn);
-        
-        return sidebar;
-    }
+    // Title
+    Label titleLabel = new Label("Inventory");
+    titleLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px; -fx-padding: 0 0 20 0;");
+
+    // Navigation buttons
+    Button workerNameBtn = createNavButton("Worker Name", false);
+    Button inventoryBtn = createNavButton("Inventory", true);
+    inventoryBtn.setOnAction(e -> go("Inventory"));
+
+    Button menuBtn = createNavButton("Menu", false);
+    menuBtn.setOnAction(e -> go("Menu")); // Navigates to MenuController tab
+
+    Button trendsBtn = createNavButton("Trends", false);
+    trendsBtn.setOnAction(e -> go("Order Trends"));
+
+    Button orderHistoryBtn = createNavButton("Order History", false);
+    orderHistoryBtn.setOnAction(e -> go("Order History"));
+
+    Button employeesBtn = createNavButton("Employees", false);
+    employeesBtn.setOnAction(e -> go("Employees"));
+
+    sidebar.getChildren().addAll(
+        titleLabel,
+        workerNameBtn,
+        inventoryBtn,
+        menuBtn,          // Added Menu button here
+        trendsBtn,
+        orderHistoryBtn,
+        employeesBtn
+    );
+
+    return sidebar;
+}
+
     
     private Button createNavButton(String text, boolean active) {
         Button btn = new Button(text);

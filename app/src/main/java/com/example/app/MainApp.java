@@ -49,8 +49,13 @@ public class MainApp extends Application {
         TrendsController trendsController = new TrendsController();
         trendsTab.setContent(trendsController);
 
+        Tab menuTab = new Tab("Menu");
+        MenuController menuController = new MenuController();
+        menuController.setDatabaseService(dbService);
+        menuTab.setContent(menuController);
+
         // Add tabs to the pane (order matters: Home first works with selectFirst())
-        tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab);
+        tabPane.getTabs().addAll(homeTab, empTab, pinTab, inventoryTab, orderHistoryTab, trendsTab, menuTab);
 
         // Start on PIN, lock everything else
         tabPane.getSelectionModel().select(pinTab);
@@ -59,7 +64,7 @@ public class MainApp extends Application {
         inventoryTab.setDisable(true);
         orderHistoryTab.setDisable(true);
         trendsTab.setDisable(true);
-
+        menuTab.setDisable(true);
         // When PIN succeeds, apply access:
         // - Manager: enable all
         // - Employee: only Home
@@ -73,6 +78,7 @@ public class MainApp extends Application {
                 inventoryTab.setDisable(false);
                 orderHistoryTab.setDisable(false);
                 trendsTab.setDisable(false);
+                menuTab.setDisable(false);
             } else {
                 homeTab.setDisable(false);
                 empTab.setDisable(true);
@@ -90,6 +96,7 @@ public class MainApp extends Application {
         inventoryController.setTabNavigator(tabPane);
         OrderHistoryController.setTabNavigator(tabPane);
         trendsController.setTabNavigator(tabPane);
+        menuController.setTabNavigator(tabPane);
         
 
         // === Create Scene and show Stage ===
