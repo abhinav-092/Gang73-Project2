@@ -517,7 +517,7 @@ public class HomeController extends VBox {
 
     // CHANGED: insertOrderToDB now takes DrinkConfig with all customization info
     private void insertOrderToDB() {
-        int combo_ID;
+        int combo_ID = 0;
         int order_num = 0;
 
         try {
@@ -534,7 +534,6 @@ public class HomeController extends VBox {
 
             for (DrinkConfig drink : currentOrderDrinks){
                 int item_ID = 0;
-                combo_ID = 0;
                 sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.drinkName + "'";
                 rs = db.executeQuery(sql);
                 if (rs.next()) {
@@ -544,7 +543,7 @@ public class HomeController extends VBox {
                 }
                 sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
                 db.executeUpdate(sql);
-                combo_ID++;
+                // combo_ID++;
 
                 sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.iceLevel + "'";
                 rs = db.executeQuery(sql);
@@ -555,7 +554,7 @@ public class HomeController extends VBox {
                 }
                 sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
                 db.executeUpdate(sql);
-                combo_ID++;
+                // combo_ID++;
 
                 sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.sweetnessLevel + "'";
                 rs = db.executeQuery(sql);
@@ -566,7 +565,7 @@ public class HomeController extends VBox {
                 }
                 sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
                 db.executeUpdate(sql);
-                combo_ID++;
+                // combo_ID++;
 
                 sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.milkType + "'";
                 rs = db.executeQuery(sql);
@@ -589,8 +588,8 @@ public class HomeController extends VBox {
                     }
                     sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
                     db.executeUpdate(sql);
-                    combo_ID++;
                 }
+                combo_ID++;
 
             }
         }
