@@ -63,7 +63,7 @@ public class HomeController extends VBox {
     private ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
     private double total_price;
 
-
+    private OrderHistoryController orderHistoryController;
 
     // Database connection info
     DatabaseService db;
@@ -73,10 +73,14 @@ public class HomeController extends VBox {
     }
 
     public void setEmployeeName(String name) {
-    if (employeeNameField != null && name != null && !name.isBlank()) {
-        employeeNameField.setText(name);
+        if (employeeNameField != null && name != null && !name.isBlank()) {
+            employeeNameField.setText(name);
+        }
     }
-}
+
+    public void setOrderHistory(OrderHistoryController ordHistCont){
+        this.orderHistoryController = ordHistCont;
+    }
 
     private void initialize() {
         this.setPrefSize(900, 600);
@@ -317,6 +321,7 @@ public class HomeController extends VBox {
                 currentOrderDrinks.clear();
                 orderData.clear();
                 updateTotalPrice(); // === ADDED: Reset total price to $0.00 ===
+                orderHistoryController.loadDataFromDatabase();
                 System.out.println("Order placed successfully!");
             } else {
                 System.out.println("No drinks in current order.");

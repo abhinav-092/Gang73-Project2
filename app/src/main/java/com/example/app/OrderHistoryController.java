@@ -237,7 +237,7 @@ public class OrderHistoryController extends BorderPane {
         };
     }
 
-    private void loadDataFromDatabase() {
+    public void loadDataFromDatabase() {
         if (dbService == null) {
             showError("Database Error", "Database service not initialized");
             return;
