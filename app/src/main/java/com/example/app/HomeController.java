@@ -292,9 +292,12 @@ public class HomeController extends VBox {
         toppingsBox.getChildren().addAll(row1, row2);
         toppingsTab.setContent(toppingsBox);
 
-        // Add all tabs
-        tabPane.getTabs().addAll(milkTeaTab, fruitTeaTab, blendedTab, customizeTab, toppingsTab);
-        rightPane.getChildren().add(tabPane);
+        // Add all tabs to the TabPane
+        rightTabs.getTabs().addAll(milkTeaTab, fruitTeaTab, blendedTab, customizeTab, toppingsTab);
+
+        // Put the TabPane inside the right content area
+        rightContent.setCenter(rightTabs);
+
 
         // Put both sides into the SplitPane
         splitPane.getItems().addAll(leftPane, rightContent);
@@ -557,37 +560,6 @@ public class HomeController extends VBox {
             sql = "SELECT order_number FROM orders ORDER BY order_number DESC LIMIT 1";
             ResultSet rs = db.executeQuery(sql);
             if (rs.next()) order_num = rs.getInt("order_number");
-
-            for (DrinkConfig drink : currentOrderDrinks) {
-                int combo_ID = 0;
-
-                int item_ID = lookupItemId(drink.drinkName);
-                if (item_ID != 0) {
-                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
-                            order_num + ", " + combo_ID + ", " + item_ID + ")");
-                }
-                combo_ID++;
-
-                item_ID = lookupItemId(drink.iceLevel);
-                if (item_ID != 0) {
-                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
-                            order_num + ", " + combo_ID + ", " + item_ID + ")");
-                }
-                combo_ID++;
-
-                item_ID = lookupItemId(drink.sweetnessLevel);
-                if (item_ID != 0) {
-                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
-                            order_num + ", " + combo_ID + ", " + item_ID + ")");
-                }
-                combo_ID++;
-
-                item_ID = lookupItemId(drink.milkType);
-                if (item_ID != 0) {
-                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
-                            order_num + ", " + combo_ID + ", " + item_ID + ")");
-                }
-            }
 
             for (DrinkConfig drink : currentOrderDrinks){
                 int item_ID = 0;
