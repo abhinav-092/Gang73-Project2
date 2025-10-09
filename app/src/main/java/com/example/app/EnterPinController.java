@@ -21,6 +21,9 @@ public class EnterPinController extends BorderPane {
     private DatabaseService dbService;
     private TabPane tabPane;
 
+    private HomeController homeController;
+
+
     // Callback to tell MainApp whether the user is a manager
     private Consumer<Boolean> accessApplier;
 
@@ -28,6 +31,9 @@ public class EnterPinController extends BorderPane {
         initialize();
     }
 
+    public void setHomeController(HomeController homeController) {
+        this.homeController = homeController;
+    }
     public void setDatabaseService(DatabaseService dbService) {
         this.dbService = dbService;
     }
@@ -133,20 +139,27 @@ public class EnterPinController extends BorderPane {
         } catch (SQLException ignore) { /* handled on query below */ }
 
         // Get is_manager (boolean) for this employee
-        String sql = "SELECT is_manager FROM employees WHERE Employee_ID = ?";
+        String sql = "SELECT employee_name, is_manager FROM employees WHERE employee_ID = ?";
 
         try (PreparedStatement stmt = dbService.getConnection().prepareStatement(sql)) {
             stmt.setInt(1, empId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    boolean isManager = rs.getBoolean("is_manager"); // Postgres boolean
+                    String employeeName = rs.getString("employee_name"); // or "employee_name"
+                    boolean isManager = rs.getBoolean("is_manager");
+
                     statusLabel.setText("Login successful!");
                     pinField.clear();
+
+                    // Tell HomeController to show the employee's name
+                    if (homeController != null && employeeName != null) {
+                        homeController.setEmployeeName(employeeName);
+                    }
 
                     // Tell MainApp to enable/disable tabs based on role
                     if (accessApplier != null) accessApplier.accept(isManager);
 
-                    // Select first tab (Home). MainApp already unlocked it.
+                    // Select first tab (Home)
                     if (tabPane != null) tabPane.getSelectionModel().selectFirst();
                 } else {
                     statusLabel.setText("Invalid Employee ID!");
@@ -156,5 +169,6 @@ public class EnterPinController extends BorderPane {
             e.printStackTrace();
             statusLabel.setText("Database error!");
         }
+
     }
 }

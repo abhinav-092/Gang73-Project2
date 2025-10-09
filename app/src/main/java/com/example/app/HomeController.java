@@ -79,7 +79,14 @@ public class HomeController extends VBox {
         if (employeeNameField != null && name != null && !name.isBlank()) {
             employeeNameField.setText(name);
         }
+
+        // Update top-bar label if it exists
+        Label topLabel = (Label) ((HBox) ((BorderPane) ((SplitPane) this.getChildren().get(0)).getItems().get(1)).getTop()).getChildren().get(1);
+        if (topLabel != null && name != null && !name.isBlank()) {
+            topLabel.setText("Employee: " + name);
+        }
     }
+
 
     public void setOrderHistory(OrderHistoryController ordHistCont){
         this.orderHistoryController = ordHistCont;
@@ -126,6 +133,8 @@ public class HomeController extends VBox {
         employeeNameField.setLayoutY(22);
         employeeNameField.setPrefSize(151, 26);
         employeeNameField.setPromptText("Employee Name");
+        employeeNameField.setEditable(false);
+
 
         managerModeButton = new Button("\u2630"); // Unicode ≡
         managerModeButton.setLayoutX(12);
@@ -146,6 +155,13 @@ public class HomeController extends VBox {
         Label titleLabel = new Label("Home");
         titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
 
+        // === Display employee name on top-left ===
+        Label employeeDisplayLabel = new Label();
+        employeeDisplayLabel.setFont(new Font(18));
+        employeeDisplayLabel.setTextFill(Color.DARKGRAY);
+        HBox.setMargin(employeeDisplayLabel, new Insets(0, 0, 0, 20));
+
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
@@ -159,7 +175,7 @@ public class HomeController extends VBox {
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
         buttonBox.getChildren().addAll(logoutBtn);
 
-        topBar.getChildren().addAll(titleLabel, spacer, buttonBox);
+        topBar.getChildren().addAll(titleLabel, employeeDisplayLabel, spacer, buttonBox);
         rightContent.setTop(topBar);
 
         // Tabs area
@@ -350,6 +366,7 @@ public class HomeController extends VBox {
                 insertOrderToDB();
                 currentOrderDrinks.clear();
                 orderData.clear();
+                total_price = 0;
                 updateTotalPrice(); // === ADDED: Reset total price to $0.00 ===
                 orderHistoryController.loadDataFromDatabase();
                 System.out.println("Order placed successfully!");

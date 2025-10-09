@@ -33,6 +33,8 @@ public class MainApp extends Application {
         pinController.setDatabaseService(dbService);
         pinController.setTabPane(tabPane);
         pinTab.setContent(pinController);
+        pinController.setHomeController(homeController);
+
 
         Tab inventoryTab = new Tab("Inventory");
         InventoryController inventoryController = new InventoryController();
