@@ -16,6 +16,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 public class HomeController extends VBox {
 
     // === Table & inputs ===
@@ -568,10 +572,18 @@ public class HomeController extends VBox {
     private void insertOrderToDB() {
         int combo_ID = 0;
         int order_num = 0;
+        
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
 
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
+
+        String formattedDate = today.format(dateFormatter); // e.g. "10/08/2025"
+        String formattedTime = now.format(timeFormatter);   // e.g. "01:55 PM"
         try {
             String sql = "INSERT INTO orders (order_date, order_time, total_price, employee_ID) " +
-                    "VALUES ('10/08/2025', '01:55 PM', " + total_price + ", 0000)";
+             "VALUES ('" + formattedDate + "', '" + formattedTime + "', " + total_price + ", 0000)";
             db.executeUpdate(sql);
 
             sql = "SELECT order_number FROM orders ORDER BY order_number DESC LIMIT 1";
