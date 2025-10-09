@@ -21,5 +21,4 @@ com\example\app\InventoryController.class
 com\example\app\OrderHistoryController$OrderRecord.class
 com\example\app\HomeController.class
 com\example\app\InventoryController$InventoryItem.class
-com\example\app\HomeController$Order.class
 com\example\app\InventoryController$1.class
