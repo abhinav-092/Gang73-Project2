@@ -37,6 +37,9 @@ public class HomeController extends VBox {
     public ToggleButton sweetToggleNone, sweetToggleLess, sweetToggleRegular, sweetToggleExtra;
     public ToggleButton wholeMilkToggle, oatMilkToggle, almondMilkToggle;
 
+    //Toppins buttons
+    public Button tapiocaButton, crystalButton, poppingButton, lycheeButton;
+
     // Place Order Button
     private Button placeOrderButton;
 
@@ -50,11 +53,15 @@ public class HomeController extends VBox {
     private String selectedDrink = null;
     private Button currentlySelectedButton = null;
 
+    // Track selected toppings
+    private List<Button> selectedToppingsButtons = new ArrayList<>();
+
     // CHANGED: Store current drink configuration with all customizations
     private List<DrinkConfig> currentOrderDrinks = new ArrayList<>();
 
     // === NEW: Observable list for TableView items ===
     private ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
+    private double total_price;
 
 
 
@@ -229,8 +236,31 @@ public class HomeController extends VBox {
         customizeBox.getChildren().addAll(iceLabel, iceBox, sweetLabel, sweetBox, milkLabel, milkBox);
         customizeTab.setContent(customizeBox);
 
+        // ===== Toppings Tab =====
+        Tab toppingsTab = new Tab("Toppings");
+        VBox toppingsBox = new VBox(15);
+        toppingsBox.setAlignment(Pos.CENTER);
+        toppingsBox.setPadding(new Insets(10));
+
+        
+
+        // Create topping buttons
+        tapiocaButton = createToppingButton("Tapioca Pearls");
+        crystalButton = createToppingButton("Crystal Boba");
+        poppingButton = createToppingButton("Popping Boba");
+        lycheeButton = createToppingButton("Lychee Jelly");
+
+        // Layout rows
+        HBox row1 = new HBox(15, tapiocaButton, crystalButton);
+        HBox row2 = new HBox(15, poppingButton, lycheeButton);
+        row1.setAlignment(Pos.CENTER);
+        row2.setAlignment(Pos.CENTER);
+
+        toppingsBox.getChildren().addAll(row1, row2);
+        toppingsTab.setContent(toppingsBox);
+
         // Add all tabs
-        tabPane.getTabs().addAll(milkTeaTab, fruitTeaTab, blendedTab, customizeTab);
+        tabPane.getTabs().addAll(milkTeaTab, fruitTeaTab, blendedTab, customizeTab, toppingsTab);
         rightPane.getChildren().add(tabPane);
 
         // SplitPane content
@@ -299,33 +329,47 @@ public class HomeController extends VBox {
         if (selectedDrink != null) {
             try {
                 // Get base price from database
-                double price = getDrinkPriceFromDB(selectedDrink);
-                
+                double drinkPrice = getDrinkPriceFromDB(selectedDrink);
+                double drinkTotal = drinkPrice; // start with base price
+
                 // Get customization selections
                 String iceLevel = getSelectedToggle(iceToggleNone.getToggleGroup());
                 String sweetnessLevel = getSelectedToggle(sweetToggleNone.getToggleGroup());
                 String milkType = getSelectedToggle(wholeMilkToggle.getToggleGroup());
-                
+
+                // Collect selected toppings
+                List<String> selectedToppings = new ArrayList<>();
+                for (Button btn : selectedToppingsButtons) {
+                    selectedToppings.add(btn.getText());
+                }
+
+                // Add topping cost ($0.75 each)
+                double toppingCost = selectedToppings.size() * 0.75;
+                drinkTotal += toppingCost;
+
                 // Create drink configuration and store it
-                DrinkConfig config = new DrinkConfig(selectedDrink, iceLevel, sweetnessLevel, milkType, price);
+                DrinkConfig config = new DrinkConfig(selectedDrink, iceLevel, sweetnessLevel, milkType, selectedToppings, drinkTotal);
                 currentOrderDrinks.add(config);
-                
-                // Add drink to table
-                orderData.add(new OrderItem(selectedDrink, String.format("$%.2f", price)));
-                
-                // Add customizations to table (indented for visual clarity)
-                orderData.add(new OrderItem("  Ice: " + iceLevel, ""));
-                orderData.add(new OrderItem("  Sweet: " + sweetnessLevel, ""));
-                orderData.add(new OrderItem("  Milk: " + milkType, ""));
-                
-                System.out.println("New drink added: " + selectedDrink + " - $" + price);
-                System.out.println("Customizations - Ice: " + iceLevel + ", Sweet: " + sweetnessLevel + ", Milk: " + milkType);
-                
-                updateTotalPrice(); // === ADDED: Update total price after adding drink ===
-                
+
+                // Add all to running total
+                total_price += drinkTotal;
+
+                // === Add items visually to table ===
+                orderData.add(new OrderItem("Drink " + currentOrderDrinks.size() + ": " + selectedDrink, String.format("$%.2f", drinkPrice)));
+                orderData.add(new OrderItem("   Ice: " + iceLevel, ""));
+                orderData.add(new OrderItem("   Sweetness: " + sweetnessLevel, ""));
+                orderData.add(new OrderItem("   Milk: " + milkType, ""));
+
+                for (String topping : selectedToppings) {
+                    orderData.add(new OrderItem("   " + topping, "$0.75"));
+                }
+
+                System.out.println("New drink added: " + selectedDrink + " - $" + String.format("%.2f", drinkTotal));
+                updateTotalPrice();
+
                 // Reset selections for next drink
                 resetSelections();
-                
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -333,6 +377,7 @@ public class HomeController extends VBox {
             System.out.println("No drink selected!");
         }
     }
+
     
     // CHANGED: New method to reset selections after adding a drink
     private void resetSelections() {
@@ -348,15 +393,15 @@ public class HomeController extends VBox {
         iceToggleRegular.setSelected(true);
         sweetToggleRegular.setSelected(true);
         wholeMilkToggle.setSelected(true);
+        for (Button btn : selectedToppingsButtons) {
+            btn.setStyle("-fx-border-color: black; -fx-border-style: solid; -fx-background-color: white;");
+        }
+        selectedToppingsButtons.clear();
     }
 
     // === ADDED: Method to calculate and update total price display ===
     private void updateTotalPrice() {
-        double total = 0.0;
-        for (DrinkConfig drink : currentOrderDrinks) {
-            total += drink.price;
-        }
-        totalPriceLabel.setText(String.format("Total: $%.2f", total));
+        totalPriceLabel.setText(String.format("Total: $%.2f", total_price));
     }
 
     private double getDrinkPriceFromDB(String drinkName) throws SQLException {
@@ -430,6 +475,29 @@ public class HomeController extends VBox {
         GridPane.setRowIndex(button, row);
         return button;
     }
+    private Button createToppingButton(String text) {
+    Button button = new Button(text);
+    button.setPrefSize(150, 60);
+    button.setFont(new Font(16));
+    // Match milk tea buttons: same base style
+    button.setStyle("-fx-border-color: black; -fx-border-style: solid; -fx-background-color: #f4f4f4;");
+
+    // Allow multi-select toggling with matching visual feedback
+    button.setOnAction(e -> {
+        if (selectedToppingsButtons.contains(button)) {
+            // Deselect
+            selectedToppingsButtons.remove(button);
+            button.setStyle("-fx-border-color: black; -fx-border-style: solid; -fx-background-color: #f4f4f4;");
+        } else {
+            // Select
+            selectedToppingsButtons.add(button);
+            button.setStyle("-fx-border-color: #0066ff; -fx-border-width: 3; -fx-background-color: #dbe8ff;");
+        }
+    });
+
+    return button;
+    }    
+
 
     private ToggleButton createToggle(String text, ToggleGroup group) {
         ToggleButton toggle = new ToggleButton(text);
@@ -449,13 +517,9 @@ public class HomeController extends VBox {
 
     // CHANGED: insertOrderToDB now takes DrinkConfig with all customization info
     private void insertOrderToDB() {
-        double total_price = 0;
         int combo_ID;
         int order_num = 0;
 
-        for (DrinkConfig drink : currentOrderDrinks){
-            total_price += drink.price;
-        }
         try {
             String sql = "INSERT INTO orders (order_date, order_time, total_price, employee_ID) VALUES ('10/08/2025', '01:55 PM', " + total_price + ", 0000)";
             db.executeUpdate(sql);
@@ -513,6 +577,21 @@ public class HomeController extends VBox {
                 }
                 sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
                 db.executeUpdate(sql);
+
+                // Insert toppings
+                for (String topping : drink.toppings) {
+                    sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + topping + "'";
+                    rs = db.executeQuery(sql);
+                    if (rs.next()) {
+                        item_ID = rs.getInt("item_ID");
+                    } else {
+                        System.out.println("Topping not found in DB: " + topping);
+                    }
+                    sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
+                    db.executeUpdate(sql);
+                    combo_ID++;
+                }
+
             }
         }
         
@@ -538,16 +617,19 @@ public class HomeController extends VBox {
         String iceLevel;
         String sweetnessLevel;
         String milkType;
+        List<String> toppings;
         double price;
-        
-        public DrinkConfig(String drinkName, String iceLevel, String sweetnessLevel, String milkType, double price) {
+
+        public DrinkConfig(String drinkName, String iceLevel, String sweetnessLevel, String milkType, List<String> toppings, double price) {
             this.drinkName = drinkName;
             this.iceLevel = iceLevel;
             this.sweetnessLevel = sweetnessLevel;
             this.milkType = milkType;
+            this.toppings = toppings;
             this.price = price;
         }
     }
+
 
     // === NEW: Class for table rows ===
     public static class OrderItem {
