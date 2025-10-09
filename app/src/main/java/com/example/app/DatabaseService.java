@@ -15,9 +15,9 @@ public class DatabaseService {
         if (connection == null || connection.isClosed() || !isConnectionValid()) {
             try {
                 connection = DriverManager.getConnection(url, user, password);
-                System.out.println("✅ Connected to PostgreSQL database");
+                System.out.println("Connected to PostgreSQL database");
             } catch (SQLException e) {
-                System.err.println("❌ Database connection failed: " + e.getMessage());
+                System.err.println("Database connection failed: " + e.getMessage());
                 throw e;
             }
         }
