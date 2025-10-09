@@ -61,6 +61,7 @@ public class HomeController extends VBox {
 
     // === NEW: Observable list for TableView items ===
     private ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
+    private double total_price;
 
     // Database connection info
     DatabaseService db;
@@ -235,7 +236,7 @@ public class HomeController extends VBox {
         
 
         // Create topping buttons
-        tapiocaButton = createToppingButton("Tapioca Boba");
+        tapiocaButton = createToppingButton("Tapioca Pearls");
         crystalButton = createToppingButton("Crystal Boba");
         poppingButton = createToppingButton("Popping Boba");
         lycheeButton = createToppingButton("Lychee Jelly");
@@ -319,8 +320,9 @@ public class HomeController extends VBox {
         if (selectedDrink != null) {
             try {
                 // Get base price from database
-                double price = getDrinkPriceFromDB(selectedDrink);
-                
+                double drinkPrice = getDrinkPriceFromDB(selectedDrink);
+                double drinkTotal = drinkPrice; // start with base price
+
                 // Get customization selections
                 String iceLevel = getSelectedToggle(iceToggleNone.getToggleGroup());
                 String sweetnessLevel = getSelectedToggle(sweetToggleNone.getToggleGroup());
@@ -333,32 +335,32 @@ public class HomeController extends VBox {
                 }
 
                 // Add topping cost ($0.75 each)
-                price += selectedToppings.size() * 0.75;
-                
+                double toppingCost = selectedToppings.size() * 0.75;
+                drinkTotal += toppingCost;
+
                 // Create drink configuration and store it
-                DrinkConfig config = new DrinkConfig(selectedDrink, iceLevel, sweetnessLevel, milkType, selectedToppings, price);
+                DrinkConfig config = new DrinkConfig(selectedDrink, iceLevel, sweetnessLevel, milkType, selectedToppings, drinkTotal);
                 currentOrderDrinks.add(config);
-                
-                // Add drink to table
-                orderData.add(new OrderItem(selectedDrink, String.format("$%.2f", price)));
-                
-                // Add customizations to table (indented for visual clarity)
-                orderData.add(new OrderItem(iceLevel, ""));
-                orderData.add(new OrderItem(sweetnessLevel, ""));
-                orderData.add(new OrderItem(milkType, ""));
-                // Add toppings visually
+
+                // Add all to running total
+                total_price += drinkTotal;
+
+                // === Add items visually to table ===
+                orderData.add(new OrderItem("Drink " + currentOrderDrinks.size() + ": " + selectedDrink, String.format("$%.2f", drinkPrice)));
+                orderData.add(new OrderItem("   Ice: " + iceLevel, ""));
+                orderData.add(new OrderItem("   Sweetness: " + sweetnessLevel, ""));
+                orderData.add(new OrderItem("   Milk: " + milkType, ""));
+
                 for (String topping : selectedToppings) {
-                    orderData.add(new OrderItem(topping, "$0.75"));
+                    orderData.add(new OrderItem("   " + topping, "$0.75"));
                 }
 
-                System.out.println("New drink added: " + selectedDrink + " - $" + price);
-                System.out.println("Customizations - Ice: " + iceLevel + ", Sweet: " + sweetnessLevel + ", Milk: " + milkType);
-                
-                updateTotalPrice(); // === ADDED: Update total price after adding drink ===
-                
+                System.out.println("New drink added: " + selectedDrink + " - $" + String.format("%.2f", drinkTotal));
+                updateTotalPrice();
+
                 // Reset selections for next drink
                 resetSelections();
-                
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -366,6 +368,7 @@ public class HomeController extends VBox {
             System.out.println("No drink selected!");
         }
     }
+
     
     // CHANGED: New method to reset selections after adding a drink
     private void resetSelections() {
@@ -389,11 +392,7 @@ public class HomeController extends VBox {
 
     // === ADDED: Method to calculate and update total price display ===
     private void updateTotalPrice() {
-        double total = 0.0;
-        for (DrinkConfig drink : currentOrderDrinks) {
-            total += drink.price;
-        }
-        totalPriceLabel.setText(String.format("Total: $%.2f", total));
+        totalPriceLabel.setText(String.format("Total: $%.2f", total_price));
     }
 
     private double getDrinkPriceFromDB(String drinkName) throws SQLException {
@@ -509,13 +508,9 @@ public class HomeController extends VBox {
 
     // CHANGED: insertOrderToDB now takes DrinkConfig with all customization info
     private void insertOrderToDB() {
-        double total_price = 0;
         int combo_ID;
         int order_num = 0;
 
-        for (DrinkConfig drink : currentOrderDrinks){
-            total_price += drink.price;
-        }
         try {
             String sql = "INSERT INTO orders (order_date, order_time, total_price, employee_ID) VALUES ('10/08/2025', '01:55 PM', " + total_price + ", 0000)";
             db.executeUpdate(sql);
