@@ -515,6 +515,7 @@ public class HomeController extends VBox {
                 db.executeUpdate(sql);
             }
         }
+        
         catch (SQLException e){
             e.printStackTrace();
         }

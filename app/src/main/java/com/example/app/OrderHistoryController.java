@@ -294,10 +294,18 @@ public class OrderHistoryController extends BorderPane {
                     for (Integer itemId : combo.getValue()) {
                         itemNames.add(itemNameMap.getOrDefault(itemId, "Unknown Item"));
                     }
-                    drinksText.append("Drink ").append(drinkIndex).append(": ")
-                            .append(String.join(" + ", itemNames))
-                            .append("\n");
-                    drinkIndex++;
+
+                    if (!itemNames.isEmpty()) {
+                        // First item in the combo
+                        drinksText.append("Drink ").append(drinkIndex).append(": ")
+                                .append(itemNames.get(0)).append("\n");
+
+                        // Remaining items in that drink (indented)
+                        for (int i = 1; i < itemNames.size(); i++) {
+                            drinksText.append("   ").append(itemNames.get(i)).append("\n");
+                        }
+                        drinkIndex++;
+                    }
                 }
 
                 OrderInfo info = orderInfoMap.getOrDefault(orderNum, new OrderInfo("N/A", 0.0));
