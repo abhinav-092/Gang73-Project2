@@ -92,8 +92,8 @@ public class MainApp extends Application {
             tabPane.getSelectionModel().select(homeTab);
         });
 
-        // === Wire Logout from Home ===
-        homeController.setLogoutHandler(() -> {
+        // === Create shared logout handler ===
+        Runnable logoutHandler = () -> {
             // Lock everything except PIN
             homeTab.setDisable(true);
             empTab.setDisable(true);
@@ -108,7 +108,14 @@ public class MainApp extends Application {
 
             // Go back to PIN
             tabPane.getSelectionModel().select(pinTab);
-        });
+        };
+
+        // === Wire logout handler to all controllers ===
+        homeController.setLogoutHandler(logoutHandler);
+        employeesController.setLogoutHandler(logoutHandler);
+        inventoryController.setLogoutHandler(logoutHandler);
+        orderHistoryController.setLogoutHandler(logoutHandler);
+        menuController.setLogoutHandler(logoutHandler);
 
         // Optional: pass TabPane into other controllers that navigate tabs
         employeesController.setTabNavigator(tabPane);

@@ -11,13 +11,14 @@ import javafx.collections.ObservableList;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeController extends VBox {
 
-    // === CHANGED: TableView now stores OrderItem objects instead of raw types ===
+    // === Table & inputs ===
     public TableView<OrderItem> orderTable;
     public TextField orderNumberField, employeeNameField;
     public Button managerModeButton;
@@ -31,38 +32,35 @@ public class HomeController extends VBox {
 
     // Blended buttons
     public Button taroBLButton, mangoBLButton, strawberryBLButton, matchaBLButton, coffeeBLButton, honeydewBLButton;
-    
+
     // Customize toggle buttons
     public ToggleButton iceToggleNone, iceToggleLess, iceToggleRegular, iceToggleExtra;
     public ToggleButton sweetToggleNone, sweetToggleLess, sweetToggleRegular, sweetToggleExtra;
     public ToggleButton wholeMilkToggle, oatMilkToggle, almondMilkToggle;
 
-    // Place Order Button
+    // Place Order / Add Drink
     private Button placeOrderButton;
-
-    // === Added: New Drink Button ===
     private Button newDrinkButton;
 
-    // === ADDED: Total Price Label ===
+    // Total Price
     private Label totalPriceLabel;
 
-    // CHANGED: Track selected drink and currently selected button for visual feedback
+    // Selection tracking
     private String selectedDrink = null;
     private Button currentlySelectedButton = null;
 
-    // CHANGED: Store current drink configuration with all customizations
-    private List<DrinkConfig> currentOrderDrinks = new ArrayList<>();
+    // Current order items
+    private final List<DrinkConfig> currentOrderDrinks = new ArrayList<>();
 
-    // === NEW: Observable list for TableView items ===
-    private ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
+    // Table data
+    private final ObservableList<OrderItem> orderData = FXCollections.observableArrayList();
 
-    // Database connection info
+    // DB
     DatabaseService db;
 
-    // >>> ADDED FOR LOGOUT
+    // === Logout wiring ===
     private Runnable logoutHandler;
     public void setLogoutHandler(Runnable logoutHandler) { this.logoutHandler = logoutHandler; }
-    // <<< ADDED FOR LOGOUT
 
     public HomeController() {
         initialize();
@@ -75,7 +73,7 @@ public class HomeController extends VBox {
         SplitPane splitPane = new SplitPane();
         splitPane.setDividerPositions(0.2756);
 
-        // Left AnchorPane
+        // ----- Left panel -----
         AnchorPane leftPane = new AnchorPane();
 
         orderTable = new TableView<>();
@@ -83,7 +81,6 @@ public class HomeController extends VBox {
         orderTable.setLayoutY(108);
         orderTable.setPrefSize(215, 346);
 
-        // === CHANGED: Proper TableColumns for OrderItem ===
         TableColumn<OrderItem, String> itemCol = new TableColumn<>("item");
         itemCol.setCellValueFactory(data -> data.getValue().itemNameProperty());
         itemCol.setPrefWidth(105.8);
@@ -93,7 +90,7 @@ public class HomeController extends VBox {
         priceCol.setPrefWidth(109.18);
 
         orderTable.getColumns().addAll(itemCol, priceCol);
-        orderTable.setItems(orderData); // bind observable list
+        orderTable.setItems(orderData);
 
         Label orderLabel = new Label("Order #");
         orderLabel.setLayoutX(10);
@@ -119,24 +116,36 @@ public class HomeController extends VBox {
 
         leftPane.getChildren().addAll(orderTable, orderLabel, orderNumberField, employeeNameField, managerModeButton);
 
-        // >>> ADDED FOR LOGOUT (button on left panel)
-        Button logoutButton = new Button("Logout");
-        logoutButton.setLayoutX(160);
-        logoutButton.setLayoutY(15);
-        logoutButton.setPrefSize(80, 41);
-        logoutButton.setOnAction(e -> { if (logoutHandler != null) logoutHandler.run(); });
-        leftPane.getChildren().add(logoutButton);
-        // <<< ADDED FOR LOGOUT
+        // ----- Right panel: Header + Tabs (Inventory-style header with ⎋ on the right) -----
+        BorderPane rightContent = new BorderPane();
 
-        // Right AnchorPane (TabPane)
-        AnchorPane rightPane = new AnchorPane();
-        TabPane tabPane = new TabPane();
-        tabPane.setPrefSize(647, 550.5);
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        AnchorPane.setTopAnchor(tabPane, 0.0);
-        AnchorPane.setBottomAnchor(tabPane, 0.0);
-        AnchorPane.setLeftAnchor(tabPane, 0.0);
-        AnchorPane.setRightAnchor(tabPane, 0.0);
+        // Top bar (title + spacer + logout)
+        HBox topBar = new HBox();
+        topBar.setPadding(new Insets(0, 0, 20, 0));
+        topBar.setAlignment(Pos.CENTER_LEFT);
+
+        Label titleLabel = new Label("Home");
+        titleLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button logoutBtn = new Button("⎋");
+        logoutBtn.setStyle("-fx-font-size: 24px; -fx-background-color: transparent; " +
+                           "-fx-border-width: 2; -fx-border-color: black; -fx-cursor: hand; " +
+                           "-fx-padding: 5 15;");
+        logoutBtn.setOnAction(e -> handleLogout());
+
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+        buttonBox.getChildren().addAll(logoutBtn);
+
+        topBar.getChildren().addAll(titleLabel, spacer, buttonBox);
+        rightContent.setTop(topBar);
+
+        // Tabs area
+        TabPane rightTabs = new TabPane();
+        rightTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         // ===== Milk Tea Tab =====
         Tab milkTeaTab = new Tab("Milk Tea");
@@ -155,8 +164,11 @@ public class HomeController extends VBox {
         coffeeMTButton = createGridButton("Coffee", 0, 2);
         strawberryMTButton = createGridButton("Strawberry", 1, 2);
 
-        milkTeaGrid.getChildren().addAll(classicMTButton, taroMTButton, honeydewMTButton,
-                thaiMTButton, brownSugarMTButton, matchaMTButton, coffeeMTButton, strawberryMTButton);
+        milkTeaGrid.getChildren().addAll(
+                classicMTButton, taroMTButton, honeydewMTButton,
+                thaiMTButton, brownSugarMTButton, matchaMTButton,
+                coffeeMTButton, strawberryMTButton
+        );
         milkTeaTab.setContent(milkTeaGrid);
 
         // ===== Fruit Tea Tab =====
@@ -172,8 +184,10 @@ public class HomeController extends VBox {
         strawberryFTButton = createGridButton("Strawberry Green", 0, 1, 150, 100, 16);
         wintermelonFTButton = createGridButton("Wintermelon", 1, 1, 150, 100, 16);
 
-        fruitTeaGrid.getChildren().addAll(passionfruitFTButton, mangoFTButton, lycheeFTButton,
-                strawberryFTButton, wintermelonFTButton);
+        fruitTeaGrid.getChildren().addAll(
+                passionfruitFTButton, mangoFTButton, lycheeFTButton,
+                strawberryFTButton, wintermelonFTButton
+        );
         fruitTeaTab.setContent(fruitTeaGrid);
 
         // ===== Blended Tab =====
@@ -190,8 +204,10 @@ public class HomeController extends VBox {
         coffeeBLButton = createGridButton("Coffee", 1, 1);
         honeydewBLButton = createGridButton("Honeydew", 2, 1);
 
-        blendedGrid.getChildren().addAll(taroBLButton, mangoBLButton, strawberryBLButton,
-                matchaBLButton, coffeeBLButton, honeydewBLButton);
+        blendedGrid.getChildren().addAll(
+                taroBLButton, mangoBLButton, strawberryBLButton,
+                matchaBLButton, coffeeBLButton, honeydewBLButton
+        );
         blendedTab.setContent(blendedGrid);
 
         // ===== Customize Tab =====
@@ -234,29 +250,29 @@ public class HomeController extends VBox {
         customizeBox.getChildren().addAll(iceLabel, iceBox, sweetLabel, sweetBox, milkLabel, milkBox);
         customizeTab.setContent(customizeBox);
 
-        // Add all tabs
-        tabPane.getTabs().addAll(milkTeaTab, fruitTeaTab, blendedTab, customizeTab);
-        rightPane.getChildren().add(tabPane);
+        // Add tabs to right side
+        rightTabs.getTabs().addAll(milkTeaTab, fruitTeaTab, blendedTab, customizeTab);
+        rightContent.setCenter(rightTabs);
 
-        // SplitPane content
-        splitPane.getItems().addAll(leftPane, rightPane);
+        // Put both sides into the SplitPane
+        splitPane.getItems().addAll(leftPane, rightContent);
 
-        // Bottom HBox
+        // ----- Bottom bar -----
         HBox bottomBox = new HBox();
         bottomBox.setAlignment(Pos.CENTER_LEFT);
         bottomBox.setSpacing(5);
-        Pane spacer = new Pane();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Pane spacerBottom = new Pane();
+        HBox.setHgrow(spacerBottom, Priority.ALWAYS);
         Label timeLabel = new Label("time");
         timeLabel.setFont(new Font(11));
         timeLabel.setTextFill(Color.rgb(159, 159, 159));
-        bottomBox.getChildren().addAll(spacer, timeLabel);
+        bottomBox.getChildren().addAll(spacerBottom, timeLabel);
         bottomBox.setPadding(new Insets(3));
 
         this.getChildren().addAll(splitPane, bottomBox);
         VBox.setVgrow(splitPane, Priority.ALWAYS);
 
-        // ===== Setup button actions =====
+        // Button actions
         setupAllDrinkButtons();
 
         // Place Order button
@@ -266,14 +282,14 @@ public class HomeController extends VBox {
         placeOrderButton.setPrefSize(100, 40);
         leftPane.getChildren().add(placeOrderButton);
 
-        // === Added: New Drink Button setup ===
+        // Add Drink button
         newDrinkButton = new Button("Add Drink");
         newDrinkButton.setLayoutX(127);
         newDrinkButton.setLayoutY(470);
         newDrinkButton.setPrefSize(100, 40);
         leftPane.getChildren().add(newDrinkButton);
 
-        // === ADDED: Total Price Label setup ===
+        // Total Price label
         totalPriceLabel = new Label("Total: $0.00");
         totalPriceLabel.setLayoutX(12);
         totalPriceLabel.setLayoutY(520);
@@ -281,17 +297,15 @@ public class HomeController extends VBox {
         totalPriceLabel.setStyle("-fx-font-weight: bold;");
         leftPane.getChildren().add(totalPriceLabel);
 
+        // Handlers
         newDrinkButton.setOnAction(e -> startNewDrink());
-        
-        // CHANGED: Place Order button now processes all drinks in currentOrderDrinks list
+
         placeOrderButton.setOnAction(e -> {
             if (!currentOrderDrinks.isEmpty()) {
-                // Insert all drinks into database
                 insertOrderToDB();
-                // Clear current order and table
                 currentOrderDrinks.clear();
                 orderData.clear();
-                updateTotalPrice(); // === ADDED: Reset total price to $0.00 ===
+                updateTotalPrice();
                 System.out.println("Order placed successfully!");
             } else {
                 System.out.println("No drinks in current order.");
@@ -299,38 +313,41 @@ public class HomeController extends VBox {
         });
     }
 
-    // CHANGED: startNewDrink now adds drink + customizations to table and stores configuration
+    // === Logout (Inventory-style) ===
+    private void handleLogout() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Logout");
+        alert.setHeaderText("Are you sure you want to logout?");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                System.out.println("Logging out...");
+                if (logoutHandler != null) logoutHandler.run();
+            }
+        });
+    }
+
     private void startNewDrink() {
         if (selectedDrink != null) {
             try {
-                // Get base price from database
                 double price = getDrinkPriceFromDB(selectedDrink);
-                
-                // Get customization selections
+
                 String iceLevel = getSelectedToggle(iceToggleNone.getToggleGroup());
                 String sweetnessLevel = getSelectedToggle(sweetToggleNone.getToggleGroup());
                 String milkType = getSelectedToggle(wholeMilkToggle.getToggleGroup());
-                
-                // Create drink configuration and store it
+
                 DrinkConfig config = new DrinkConfig(selectedDrink, iceLevel, sweetnessLevel, milkType, price);
                 currentOrderDrinks.add(config);
-                
-                // Add drink to table
+
                 orderData.add(new OrderItem(selectedDrink, String.format("$%.2f", price)));
-                
-                // Add customizations to table (indented for visual clarity)
                 orderData.add(new OrderItem("  Ice: " + iceLevel, ""));
                 orderData.add(new OrderItem("  Sweet: " + sweetnessLevel, ""));
                 orderData.add(new OrderItem("  Milk: " + milkType, ""));
-                
-                System.out.println("New drink added: " + selectedDrink + " - $" + price);
-                System.out.println("Customizations - Ice: " + iceLevel + ", Sweet: " + sweetnessLevel + ", Milk: " + milkType);
-                
-                updateTotalPrice(); // === ADDED: Update total price after adding drink ===
-                
-                // Reset selections for next drink
+
+                updateTotalPrice();
                 resetSelections();
-                
+
+                System.out.printf("New drink added: %s - $%.2f%n", selectedDrink, price);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -338,29 +355,21 @@ public class HomeController extends VBox {
             System.out.println("No drink selected!");
         }
     }
-    
-    // CHANGED: New method to reset selections after adding a drink
+
     private void resetSelections() {
         selectedDrink = null;
-        
-        // Clear visual selection from button
         if (currentlySelectedButton != null) {
             currentlySelectedButton.setStyle("-fx-border-color: black; -fx-border-style: solid;");
             currentlySelectedButton = null;
         }
-        
-        // Reset customizations to defaults
         iceToggleRegular.setSelected(true);
         sweetToggleRegular.setSelected(true);
         wholeMilkToggle.setSelected(true);
     }
 
-    // === ADDED: Method to calculate and update total price display ===
     private void updateTotalPrice() {
         double total = 0.0;
-        for (DrinkConfig drink : currentOrderDrinks) {
-            total += drink.price;
-        }
+        for (DrinkConfig drink : currentOrderDrinks) total += drink.price;
         totalPriceLabel.setText(String.format("Total: $%.2f", total));
     }
 
@@ -368,15 +377,11 @@ public class HomeController extends VBox {
         if (db == null) return 0.0;
         String sql = "SELECT base_price FROM menu_items WHERE item_name = '" + drinkName + "'";
         try (ResultSet ps = db.executeQuery(sql)) {
-            if (ps.next()){
+            if (ps.next()) {
                 return ps.getDouble("base_price");
+            } else {
+                System.out.println("Menu item not found: " + drinkName);
             }
-            else{
-                System.out.println("Table empty");
-            }
-        }
-        catch (SQLException e){
-            e.printStackTrace();
         }
         return 0.0;
     }
@@ -403,21 +408,14 @@ public class HomeController extends VBox {
         setupDrinkButton(honeydewBLButton, "Honeydew Smoothie");
     }
 
-    // CHANGED: setupDrinkButton now provides visual feedback and ensures mutual exclusivity
     private void setupDrinkButton(Button button, String drinkName) {
         button.setOnAction(e -> {
-            // Clear previous selection styling
             if (currentlySelectedButton != null) {
                 currentlySelectedButton.setStyle("-fx-border-color: black; -fx-border-style: solid;");
             }
-            
-            // Set new selection
             selectedDrink = drinkName;
             currentlySelectedButton = button;
-            
-            // Highlight selected button
             button.setStyle("-fx-border-color: blue; -fx-border-width: 3; -fx-border-style: solid;");
-            
             System.out.println("Selected drink: " + drinkName);
         });
     }
@@ -452,98 +450,73 @@ public class HomeController extends VBox {
         this.db = db;
     }
 
-    // CHANGED: insertOrderToDB now takes DrinkConfig with all customization info
+    // Write order & items (simplified demo)
     private void insertOrderToDB() {
         double total_price = 0;
-        int combo_ID;
         int order_num = 0;
 
-        for (DrinkConfig drink : currentOrderDrinks){
-            total_price += drink.price;
-        }
+        for (DrinkConfig drink : currentOrderDrinks) total_price += drink.price;
+
         try {
-            String sql = "INSERT INTO orders (order_date, order_time, total_price, employee_ID) VALUES ('10/08/2025', '01:55 PM', " + total_price + ", 0000)";
+            String sql = "INSERT INTO orders (order_date, order_time, total_price, employee_ID) " +
+                    "VALUES ('10/08/2025', '01:55 PM', " + total_price + ", 0000)";
             db.executeUpdate(sql);
 
             sql = "SELECT order_number FROM orders ORDER BY order_number DESC LIMIT 1";
             ResultSet rs = db.executeQuery(sql);
-            if (rs.next()) {
-                order_num = rs.getInt("order_number");
-            } else {
-                System.out.println("Table is empty.");
+            if (rs.next()) order_num = rs.getInt("order_number");
+
+            for (DrinkConfig drink : currentOrderDrinks) {
+                int combo_ID = 0;
+
+                int item_ID = lookupItemId(drink.drinkName);
+                if (item_ID != 0) {
+                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
+                            order_num + ", " + combo_ID + ", " + item_ID + ")");
+                }
+                combo_ID++;
+
+                item_ID = lookupItemId(drink.iceLevel);
+                if (item_ID != 0) {
+                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
+                            order_num + ", " + combo_ID + ", " + item_ID + ")");
+                }
+                combo_ID++;
+
+                item_ID = lookupItemId(drink.sweetnessLevel);
+                if (item_ID != 0) {
+                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
+                            order_num + ", " + combo_ID + ", " + item_ID + ")");
+                }
+                combo_ID++;
+
+                item_ID = lookupItemId(drink.milkType);
+                if (item_ID != 0) {
+                    db.executeUpdate("INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" +
+                            order_num + ", " + combo_ID + ", " + item_ID + ")");
+                }
             }
-
-            for (DrinkConfig drink : currentOrderDrinks){
-                int item_ID = 0;
-                combo_ID = 0;
-                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.drinkName + "'";
-                rs = db.executeQuery(sql);
-                if (rs.next()) {
-                    item_ID = rs.getInt("item_ID");
-                } else {
-                    System.out.println("Table is empty.");
-                }
-                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
-                db.executeUpdate(sql);
-                combo_ID++;
-
-                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.iceLevel + "'";
-                rs = db.executeQuery(sql);
-                if (rs.next()) {
-                    item_ID = rs.getInt("item_ID");
-                } else {
-                    System.out.println("Table is empty.");
-                }
-                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
-                db.executeUpdate(sql);
-                combo_ID++;
-
-                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.sweetnessLevel + "'";
-                rs = db.executeQuery(sql);
-                if (rs.next()) {
-                    item_ID = rs.getInt("item_ID");
-                } else {
-                    System.out.println("Table is empty.");
-                }
-                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
-                db.executeUpdate(sql);
-                combo_ID++;
-
-                sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + drink.milkType + "'";
-                rs = db.executeQuery(sql);
-                if (rs.next()) {
-                    item_ID = rs.getInt("item_ID");
-                } else {
-                    System.out.println("Table is empty.");
-                }
-                sql = "INSERT INTO order_summary (order_number, combo_ID, item_ID) VALUES (" + order_num + ", " + combo_ID + ", " + item_ID + ")";
-                db.executeUpdate(sql);
-            }
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // ===== Order class (kept for backwards compatibility) =====
-    static class Order {
-        String drink, ice, sweetness, milk;
-        public Order(String drink, String ice, String sweetness, String milk) {
-            this.drink = drink;
-            this.ice = ice;
-            this.sweetness = sweetness;
-            this.milk = milk;
-        }
+    private int lookupItemId(String name) throws SQLException {
+        String sql = "SELECT item_ID FROM menu_items WHERE item_name = '" + name + "'";
+        ResultSet rs = db.executeQuery(sql);
+        if (rs.next()) return rs.getInt("item_ID");
+        System.out.println("Item not found in menu_items: " + name);
+        return 0;
     }
 
-    // CHANGED: New DrinkConfig class to store complete drink configuration including price
+    // ===== Inner classes =====
     static class DrinkConfig {
         String drinkName;
         String iceLevel;
         String sweetnessLevel;
         String milkType;
         double price;
-        
+
         public DrinkConfig(String drinkName, String iceLevel, String sweetnessLevel, String milkType, double price) {
             this.drinkName = drinkName;
             this.iceLevel = iceLevel;
@@ -553,7 +526,6 @@ public class HomeController extends VBox {
         }
     }
 
-    // === NEW: Class for table rows ===
     public static class OrderItem {
         private final StringProperty itemName;
         private final StringProperty price;
@@ -562,7 +534,6 @@ public class HomeController extends VBox {
             this.itemName = new SimpleStringProperty(itemName);
             this.price = new SimpleStringProperty(price);
         }
-
         public StringProperty itemNameProperty() { return itemName; }
         public StringProperty priceProperty() { return price; }
     }
