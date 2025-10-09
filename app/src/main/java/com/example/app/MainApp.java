@@ -44,6 +44,8 @@ public class MainApp extends Application {
         orderHistoryController.setDatabaseService(dbService);
         orderHistoryTab.setContent(orderHistoryController);
 
+        homeController.setOrderHistory(OrderHistoryController);
+
         Tab trendsTab = new Tab("Order Trends");
         TrendsController trendsController = new TrendsController();
         trendsTab.setContent(trendsController);
